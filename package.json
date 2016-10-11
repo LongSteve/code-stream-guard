@@ -1,0 +1,32 @@
+{
+  "name": "code-stream-guard",
+  "version": "0.0.1",
+  "description": "A Chat Bot for Live Coding Streamers",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LongSteve/code-stream-guard.git"
+  },
+  "keywords": [
+    "xmpp",
+    "irc",
+    "chat",
+    "bot",
+    "livecoding.tv",
+    "twitch.tv",
+    "programming",
+    "streaming"
+  ],
+  "author": "Steve Longhurst",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/LongSteve/code-stream-guard/issues"
+  },
+  "homepage": "https://github.com/LongSteve/code-stream-guard#readme",
+  "dependencies": {
+    "node-xmpp-client": "^3.0.2"
+  }
+}
