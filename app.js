@@ -1,3 +1,5 @@
+var _ = require ('lodash');
+
 var xmppbot = require ('./bot-xmpp');
 var config = require ('./config.json')['livecoding.tv'];
 var bot = new xmppbot (config);
@@ -10,13 +12,98 @@ var bot = new xmppbot (config);
 //       "channel": "<streamer>",                  // username of the streamer to join their chat channel
 //       "nickname": "<username>@livecoding.tv",   // the user the bot will appear as
 //       "password": "<password>"                  // the bot users password
+//       "followers-feed-url": 
+//         "https://www.livecoding.tv/rss/longsteve/followers/?key=<your url feed key>"
 //    }
 // }
 //
 // Then simply "node app.js"
 //
 
+//
+// Ideas for commands:
+//   !spaces or !tabs
+//
+
+
+//
+// RSS Feed reader for the followers
+//
+
+var FeedParser = require ('feedparser');
+var request = require ('request');
+
+var req = request (config ['followers-feed-url']);
+var feedparser = new FeedParser ();
+
+//
+// Followers are saved in a json file
+//
+var jsonfile = require ('jsonfile')
+
+// Load the currently known followers list from the json file
+var file = __dirname + '/followers.json';
+
+req.on('error', function (error) {
+  // handle any request errors
+});
+
+req.on('response', function (res) {
+  var stream = this;
+
+  if (res.statusCode != 200) 
+     return this.emit ('error', new Error('Bad status code'));
+
+  stream.pipe (feedparser);
+});
+
+feedparser.on ('error', function (error) {
+  // always handle errors
+});
+
+feedparser.on ('readable', function () {
+
+  // This is where the action is!
+  var stream = this;
+  var item;
+
+  var followers = [];
+
+  while (item = stream.read ()) {
+    followers.push (item.title);
+  }
+
+  // TODO: Don't do this sync
+  var saved_followers = [];
+  try {
+    saved_followers = jsonfile.readFileSync (file);
+  } catch (ex) {
+    // Likely the file doesn't exist yet
+    // console.log (ex);
+  }
+
+  // Are any of the entries in followers new
+  var joined_since = _.difference (followers, _.map (saved_followers, "name"));
+  if (joined_since.length > 0) {
+     // new followers:
+     console.log ("New follower: " + joined_since);
+
+     _.each (followers, function (follower) {
+        saved_followers.push ({
+           name: follower,
+           date: new Date
+        });
+     });
+  }
+
+  // Save the current set of followers
+  jsonfile.writeFileSync (file, saved_followers);
+});
+
+//
 // Save !rate values for each viewer
+//
+
 var ratings = {};
 
 bot.on ('online', function (data) {
