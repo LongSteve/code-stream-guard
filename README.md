@@ -12,18 +12,18 @@ livecoding.tv is supported, using the XMPP chat connection.
 
 # Features
 
-* Connect to livecoding.tv chat channels
-* Welcome new viewers in the chat
-* Provides a transparent stream overlay window for notifications
-* Displays a popup welcome avatar image for viewers joining
-* Displays a popup welcome avatar image for new followers including a shower of fireworks
-* Displays a popup animation when someone submits a rating
-* Provides the following chat bot commmands:
-..* !help
-..* !cloc - Count lines of code
-..* !rate N - Rate the streamer between 0 and 100
-* Separate strings.json file for message customisation
-* Followers and ratings saved to json files between sessions
+1. Connect to livecoding.tv chat channels
+1. Welcome new viewers in the chat
+1. Provides a transparent stream overlay window for notifications
+1. Displays a popup welcome avatar image for viewers joining
+1. Displays a popup welcome avatar image for new followers including a shower of fireworks
+1. Displays a popup animation when someone submits a rating
+1. Provides the following chat bot commmands:
+  * !help
+  * !cloc - Count lines of code
+  * !rate N - Rate the streamer between 0 and 100
+1. Separate strings.json file for message customisation
+1. Followers and ratings saved to json files between sessions
 
 # TODO
 
