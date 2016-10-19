@@ -1,0 +1,12 @@
+{
+   "livecoding.tv": {
+      "domain": "chat.livecoding.tv",
+      "channel": "<< your lctv username (or whatever channel you want the bot to join), eg. longsteve >>",
+      "nickname": "<< your full bot username, eg. my_chat_bot@livecoding.tv >>",
+      "password": "<<< The bot lctv login password >>",
+      "chatname": "<< An arbitrary name your chat bot calls itself by, eg. Tim >>",
+      "owner": "<< An arbitrary name the bot uses to refer to you, eg. Steve >>",
+      "followers-feed-url": "<< Your follower feed url, obtained from the lctv Follows page >>",
+      "cloc-command": "cloc --exclude-dir=node_modules,frameworks --exclude-lang=CMake --progress-rate=0 --csv --quiet << Your absolute project file path >>"
+   }
+}

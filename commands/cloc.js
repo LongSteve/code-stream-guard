@@ -6,19 +6,26 @@
 module.exports = {
    name: 'cloc',
    args: '',
-   help: 'Count lines of code',
-   init: function (chatter, bot) {
+
+   init: function (chatter, config, strings, bot) {
+
+      this.help = strings.get ('help-cloc');
+
       bot.on( 'command!cloc', function (channel, text, nickname, stanza) {
          // Run the cloc command on the source code and report the results
          var exec = require ('child_process').exec;
-         var command = 'cloc --exclude-dir=node_modules,frameworks --exclude-lang=CMake --progress-rate=0 --csv --quiet /Users/steve/Projects/AquaStax/aquastax';
+         var command = config ['cloc-command'];
+         if (!command) {
+            command = 'cloc --exclude-dir=node_modules,frameworks --exclude-lang=CMake --progress-rate=0 --csv --quiet ' + __dirname;
+         }
          console.log ("Running the cloc command");
-         exec (command, function (error, stdout, stderr) { 
+         console.log (command);
+         exec (command, function (error, stdout, stderr) {
 
             if (error) {
                bot.message (channel, 'I\'m afraid there was an error with the !cloc command.');
                console.log (error);
-            } else {         
+            } else {
                // The cloc command returns CSV like so:
                // files,language,blank,comment,code,"http://cloc.sourceforge.net v 1.60  T=0.05 s (38.1 files/s, 4226.8 lines/s)"
                // 2,Javascript,28,26,168

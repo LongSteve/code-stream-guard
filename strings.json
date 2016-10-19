@@ -1,0 +1,22 @@
+{
+   "chat-bot-greeting": "Hi everyone, I'm {name} the chat bot",
+   "chat-bot-leaving": "I'm shutting down for a bit now, bye all.",
+   "chat-new-follower": "Thanks for following, {name}, much appreciated.",
+   "chat-welcome-follower": "Welcome esteemed follower {name}.",
+   "chat-welcome-normal": "Hi {name} thanks for stopping by, how's it going?",
+   "chat-unfollowed": "Sorry to see you unfollow, {name}, all the best.",
+   "frontend-welcome": "Welcome<br/>{name}",
+   "frontend-latest-follower": "Latest Follower<br/>{name}",
+   "help-message-header": "You can use the following commands:\n  !help   - Show this help\n",
+   "help-cloc": "Count lines of code",
+   "help-rate": "Rate {owner} (0-100)",
+   "rate-0-currently": "{owner}'s rating is currently 0,\nnobody has submitted a rating yet!",
+   "rate-1-currently": "{owner}'s rating is currently {pct}%,\n1 viewer has rated so far.",
+   "rate-n-currently": "{owner}'s rating is currently {pct}%,\n{num} viewers has rated so far.",
+   "rate-gt-100": "Thanks for the super support {name}, but you can only rate up to 100 I'm afraid!",
+   "rate-lt-0": "Sorry you feel that way {name}, but 0 is the lowest rating you can give!",
+   "rate-thanks": "Thanks {name}, {owner} really appreciates the feedback.",
+   "rate-1-new": "{owner}'s new rating is {pct}%,\n1 viewer has rated so far.",
+   "rate-n-new": "{owner}'s new rating is {pct}%,\n{num} viewers has rated so far.",
+   "rate-error": "You need to supply a number between 0 and 100 with the !rate command."
+}

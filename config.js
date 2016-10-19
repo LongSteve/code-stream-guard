@@ -1,3 +1,8 @@
+//
+// The config module reads in the config.json file and sets properties on a singleton to be
+// used throughout the code.
+//
+
 function Config () {
 }
 

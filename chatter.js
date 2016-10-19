@@ -11,22 +11,7 @@ var EventEmitter = require ('events').EventEmitter;
 
 var xmppbot = require ('./bot-xmpp');
 var config = require ('./config.js');
-
-//
-// To run this on the command line, make a config.json like so:
-// {
-//    "livecoding.tv": {
-//       "domain": "chat.livecoding.tv",
-//       "channel": "<streamer>",                  // username of the streamer to join their chat channel
-//       "nickname": "<username>@livecoding.tv",   // the user the bot will appear as
-//       "password": "<password>"                  // the bot users password
-//       "followers-feed-url": 
-//         "https://www.livecoding.tv/rss/longsteve/followers/?key=<your url feed key>"
-//    }
-// }
-//
-// Then simply "node app.js"
-//
+var strings = require ('./strings.js');
 
 //
 // Ideas for commands:
@@ -43,8 +28,7 @@ var Chatter = function Chatter () {
 
    var commands = {};
 
-   var helpmessage = 'You can use the following commands:\n' +
-                     '  !help   - Show this help\n';
+   var helpmessage = strings.get ('help-message-header');
 
    var bot = new xmppbot (config);
 
@@ -55,8 +39,8 @@ var Chatter = function Chatter () {
       if (file.match (/.+\.js/g) !== null) {
          var name = file.replace ('.js', '');
          commands [name] = require ('./commands/' + file);
+         commands [name].init (self, config, strings, bot);
 
-         commands [name].init (self, bot);
          console.log ('Loaded the ' + name + ' chatter module.');
          var helpstring = '  !' + commands [name].name + ' ' + commands [name].args;
          helpstring = _.padEnd (helpstring, 10);
@@ -89,7 +73,8 @@ var Chatter = function Chatter () {
 
       // When the bot joins the room, issue the help message
       if (nickname === username) {
-         bot.message (channel, "Hi everyone, I'm tim the chat bot.");
+         var greeting = strings.get ('chat-bot-greeting', {'name': config ['chatname']});
+         bot.message (channel, greeting);
          bot.message (channel, helpmessage);
       } else {
          // Emit the joined event for all other users

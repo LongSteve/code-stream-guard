@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- winstate.js from https://github.com/azu/node-webkit-winstate and allows the window state to be saved -->
+    <script src="js/winstate.js"></script>
+
+    <!-- jQuery obviously, and the GaugeMeter plugin from https://github.com/AshAlom/GaugeMeter -->
+    <script src="lib/jquery-3.1.1.min.js"></script>
+    <script src="lib/jquery.AshAlom.gaugeMeter-2.0.0.min.js"></script>
+
+    <!-- socket.io.js is served by the Express backend with a specific route -->
+    <script src="socket.io.js"></script>
+
+    <!-- Stylesheet for the fireworks, follower and rating areas -->
+    <link type="text/css" href="css/frontend.css" rel="stylesheet" />
+
+    <title>Code Stream Guard Display</title>
+  </head>
+  <body>
+    <div class="fireworks">
+       <canvas id="fireworksCanvas"></canvas>
+    </div>
+
+    <div class="follower">
+      <div class="follower-area">
+        <b><span id="follower-text"></span></b>
+        <img id="follower-image" />
+      </div>
+    </div>
+
+    <div class="rating">
+       <div class="GaugeMeter" id="RateOMeter" data-percent="0" data-append="%"
+           data-size="200" data-theme="Red-Gold-Green" data-back="RGBa(0,0,0,0)"
+           data-animate_gauge_colors="1" data-animate_text_colors="1" data-width="15"
+           data-label="Rating" data-style="Arch" data-label_color="#FFF">
+       </div>
+    </div>
+
+    <!-- Fireworks script, runs in the fireworksCanvas -->
+    <script src="js/fireworks.js"></script>
+
+    <script>
+
+        //
+        // Initially hide the gauge and follower area
+        //
+        $ (".GaugeMeter").gaugeMeter ().hide ();
+        $ (".follower-area").hide ();
+
+        //
+        // Socket.io to communicate with the backend Express instance
+        //
+        var socket = io ();
+
+        //
+        // When we get a new rating, trigger some fireworks and show the
+        // rating using the GaugeMeter animation.  Using the jQuery queue
+        // we can chain together several ratings, but limit the queue
+        // length if someone in the chat window spams the !rate XX function.
+        //
+        socket.on ('new rating', function (event) {
+
+          // Check the queue length and clear if it's got too long
+          var length = $ (".GaugeMeter").queue ().length;
+          if (length > 20) {
+             $ (".GaugeMeter").clearQueue ();
+          }
+
+          // Make sure the pct value is locked in a closure
+          (function (pct) {
+             $ (".GaugeMeter")
+              .queue (function (next) {
+                // Clear the gauge, this is needed or it seems to create duplicate elements
+                $(this).empty ();
+                if (pct >= 50) {
+                   // Only start fireworks if the rating is high enough
+                   startFireworks (2000 + (pct * 20));
+                }
+                next ();
+               })
+              .fadeIn (400)
+              .queue (function (next) {
+                // Update the value to display and call gaugeMeter, starting the animation
+                $(this).data ("percent", pct).gaugeMeter ();
+                next ();
+              })
+              .delay (4000 + (pct * 20))
+              .fadeOut (400);
+          }) (event.percent);
+        });
+
+        //
+        // When we get a new viewer joining the chat room, welcome them with their
+        // logo and name in the 'follower' area.
+        //
+        socket.on ('new joiner', function (event) {
+           (function (evt) {
+              $ (".follower-area")
+                .queue (function (next) {
+                   $ ('#follower-image').attr ('src', evt.image_url);
+                   $ ('#follower-text').html (evt.message);
+                   next ();
+                })
+                .fadeIn (400)
+                .queue (function (next) {
+                    if (evt.isFollower) {
+                       startFireworks (1500);
+                    }
+                    next ();
+                 })
+                .delay (3000)
+                .fadeOut (400);
+           }) (event);
+        });
+
+        //
+        // Celebrate a new follower with some fireworks and their name in the
+        // new follower area (currently lasts for 20 seconds)
+        //
+        socket.on ('new follower', function (event) {
+           (function (evt) {
+              $ (".follower-area")
+                .queue (function (next) {
+                   startFireworks (8000);
+                   $ ('#follower-image').attr ('src', evt.image_url);
+                   $ ('#follower-text').html (evt.message);
+                   next ();
+                })
+                .fadeIn (400)
+                .delay (20000)
+                .fadeOut (400);
+           }) (event);
+        });
+
+    </script>
+  </body>
+</html>

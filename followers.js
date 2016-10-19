@@ -20,14 +20,15 @@ var EventEmitter = require ('events').EventEmitter;
 var jsonfile = require ('jsonfile');
 
 // Load the currently known followers list from the json file
-var jsonFilename = __dirname + '/followers.json';
+var jsonFilename = __dirname + '/saved/followers.json';
 
-var Followers = function Followers () {   
+var Followers = function Followers () {
    var self = this;
 
-   var processing = false;
    var lastFollower = null;
    var allFollowers = {};
+
+   var processing = false;
 
    var fetch = function fetch () {
 
@@ -55,7 +56,7 @@ var Followers = function Followers () {
       req.on ('response', function (res) {
         var stream = this;
 
-        if (res.statusCode != 200) 
+        if (res.statusCode != 200)
            return this.emit ('error', new Error('Bad status code'));
 
         stream.pipe (feedparser);
@@ -90,7 +91,7 @@ var Followers = function Followers () {
 
             // If anyone is in saved_followers, but not followers, then they un-followed
             var unfollowed = _.difference (_.map (saved_followers, "name"), followers);
-            if (unfollowed.length > 0) {               
+            if (unfollowed.length > 0) {
                _.pullAllWith (saved_followers, unfollowed, function (arrVal, othVal) {
                   return (arrVal.name === othVal);
                });
@@ -113,7 +114,9 @@ var Followers = function Followers () {
             lastFollower = _.maxBy (saved_followers, 'date');
 
             // Store a map of all followers
-            allFollowers = _.keyBy (saved_followers, 'name');
+            allFollowers = _.chain (saved_followers).keyBy (function (o) {
+               return _.toLower (o.name);
+            }).value ();
          });
       });
 
@@ -135,7 +138,7 @@ var Followers = function Followers () {
    console.log ("Scheduling feed job for every 30 seconds.");
    var job = schedule.scheduleJob ('*/30 * * * * *', fetch);
 
-   self.lastFollower = function lastFollower () {
+   self.lastFollower = function () {
       return lastFollower;
    };
 
