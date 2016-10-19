@@ -2,11 +2,7 @@
 
 A Chat Bot for Live Coding Streamers
 
-# Inspiration
-
-- https://github.com/LiveCodeMonkeys/lctvbot_module
-- https://gist.github.com/powdahound/940969
-- https://github.com/Cristy94/livecoding-chat-bot
+![Screenshot Example](https://github.com/longsteve/code-stream-guard/raw/master/assets/example.png "Screenshot Example")
 
 # Aim
 
@@ -35,6 +31,12 @@ livecoding.tv is supported, using the XMPP chat connection.
 * Add sound effects
 * Add more chat commands
 * Allow multiple front end connections (for indicator lights or other hardware)
+
+# Inspiration
+
+- https://github.com/LiveCodeMonkeys/lctvbot_module
+- https://gist.github.com/powdahound/940969
+- https://github.com/Cristy94/livecoding-chat-bot
 
 # Usage
 
