@@ -12,8 +12,8 @@
     "height": 384,
     "background-color": "#000000",
     "resizable": true,
-    "frame": true,
-    "transparent": false,
+    "frame": false,
+    "transparent": true,
     "show": true,
     "show_in_taskbar": false
   },
@@ -47,10 +47,12 @@
     "feedparser": "^1.1.5",
     "jsonfile": "^2.4.0",
     "lodash": "^4.16.4",
+    "minimist": "^1.2.0",
     "node-schedule": "^1.1.1",
     "node-xmpp-client": "^3.0.2",
     "nw": "^0.18.0",
     "request": "^2.75.0",
-    "socket.io": "^1.5.0"
+    "socket.io": "^1.5.0",
+    "winston": "^2.2.0"
   }
 }

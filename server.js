@@ -4,6 +4,8 @@
 
 var _ = require ('lodash');
 
+var winston = require ('winston');
+
 var fs = require ('fs');
 var util = require ('util');
 
@@ -30,22 +32,23 @@ var Server = function Server () {
    });
 
    http.listen (3000, function () {
-     console.log ('listening on *:3000');
+     winston.info ('listening on *:3000');
    });
 
    io.on ('connection', function (_socket) {
-     console.log ('front end connected');
+     winston.info ('front end connected');
      socket = _socket;
 
      self.emit ('connected', _socket);
      socket.on ('disconnect', function () {
-       console.log ('front end disconnected');
+       winston.info ('front end disconnected');
        self.emit ('disconnected', _socket);
      });
    });
 
    self.toClient = function (_socket, name, event) {
       if (_socket) {
+         winston.debug ("Socket emit: " + name);
          _socket.emit (name, event);
       }
    };

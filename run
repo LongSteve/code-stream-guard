@@ -1,2 +1,2 @@
 #!/bin/bash
-./node_modules/nw/bin/nw --enable-logging=stderr .
+./node_modules/nw/bin/nw --enable-logging=stderr . 2> error.log

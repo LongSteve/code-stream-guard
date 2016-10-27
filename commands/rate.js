@@ -5,6 +5,8 @@
 
 var _ = require ('lodash');
 
+var winston = require ('winston');
+
 var jsonfile = require ('jsonfile');
 
 // Load the currently known ratings from the json file
@@ -19,7 +21,7 @@ module.exports = {
 
       jsonfile.readFile (jsonFilename, function readJsonRatingsFile (error, ratings) {
          if (error) {
-            console.log ("Error reading ratings.json (assuming it's empty): " + error);
+            winston.error ("Error reading ratings.json (assuming it's empty): " + error);
          }
 
          ratings = ratings || {};
@@ -50,6 +52,7 @@ module.exports = {
                try {
                   var r = parseInt (text);
                   if (isNaN (r)) {
+                     winston.warn ("NaN parsing rating:" + text);
                      throw new Exception ("NaN");
                   }
 
@@ -97,7 +100,7 @@ module.exports = {
                      });
 
                      jsonfile.writeFile (jsonFilename, ratings, function wroteJsonRatingsFile () {
-                        console.log ("ratings.json written");
+                        winston.debug ("ratings.json written");
                      });
                   }
                } catch (ex) {

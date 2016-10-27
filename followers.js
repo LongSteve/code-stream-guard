@@ -4,6 +4,8 @@
 
 var _ = require ('lodash');
 
+var winston = require ('winston');
+
 var util = require ('util');
 var request = require ('request');
 var schedule = require ('node-schedule');
@@ -39,7 +41,7 @@ var Followers = function Followers () {
 
       processing = true;
 
-      //console.log ("Fetching and processing followers feed");
+      winston.silly ("Fetching and processing followers feed");
 
       // Request the followers feed URL
       var req = request (config ['followers-feed-url']);
@@ -49,29 +51,31 @@ var Followers = function Followers () {
 
       req.on ('error', function (error) {
         // handle any request errors (couldn't download the feed from the URL for example
-        console.error ("Error requesting feed URL: " + error);
+        winston.error ("Error requesting feed URL: " + error);
         processing = false;
       });
 
       req.on ('response', function (res) {
         var stream = this;
 
-        if (res.statusCode != 200)
+        if (res.statusCode != 200) {
+           winston.error ("Error response code from feed: " + res.statusCode);
            return this.emit ('error', new Error('Bad status code'));
+        }
 
         stream.pipe (feedparser);
       });
 
       feedparser.on ('error', function (error) {
         // always handle errors
-        console.error ("Error processing the feed data: " + error);
+        winston.error ("Error processing the feed data: " + error);
         processing = false;
       });
 
       feedparser.on ('end', function () {
          jsonfile.readFile (jsonFilename, function readJsonFollowersFile (error, saved_followers) {
             if (error) {
-               console.log ("Error reading followers.json (assuming no followers): " + error);
+               winston.warn ("Error reading followers.json (assuming no followers): " + error);
             }
 
             saved_followers = saved_followers || [ ];
@@ -102,7 +106,7 @@ var Followers = function Followers () {
             if (joined_since.length + unfollowed.length > 0) {
                // Save the current set of followers
                jsonfile.writeFile (jsonFilename, saved_followers, function wroteJsonFollowersFile () {
-                  //console.log ("followers.json written");
+                  winston.silly ("followers.json written");
                   processing = false;
                });
             } else {
@@ -132,10 +136,10 @@ var Followers = function Followers () {
       });
    }
 
-   console.log ("Fetching current followers feed.");
+   winston.info ("Fetching current followers feed.");
    fetch ();
 
-   console.log ("Scheduling feed job for every 30 seconds.");
+   winston.info ("Scheduling feed job for every 30 seconds.");
    var job = schedule.scheduleJob ('*/30 * * * * *', fetch);
 
    self.lastFollower = function () {

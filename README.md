@@ -27,10 +27,13 @@ livecoding.tv is supported, using the XMPP chat connection.
 
 # TODO
 
-* Clean up the window setup from new, postion and transparency are awkward
-* Add sound effects
-* Add more chat commands
-* Allow multiple front end connections (for indicator lights or other hardware)
+1. Add timestamps so people entering and leaving chat can't spam the popup or welcome text
+  * Decide on sensible defaults for repeat greeting and avatar popups
+  * Add a timestamp to each !command, so they can't be spammed (especially rate)
+1. Clean up the window setup from new, postion and transparency are awkward
+1. Add sound effects
+1. Add more chat commands
+1. Allow multiple front end connections (for indicator lights or other hardware)
 
 # Inspiration
 

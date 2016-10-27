@@ -3,6 +3,8 @@
 // with the lines of code counted.
 //
 
+var winston = require ('winston');
+
 module.exports = {
    name: 'cloc',
    args: '',
@@ -18,13 +20,13 @@ module.exports = {
          if (!command) {
             command = 'cloc --exclude-dir=node_modules,frameworks --exclude-lang=CMake --progress-rate=0 --csv --quiet ' + __dirname;
          }
-         console.log ("Running the cloc command");
-         console.log (command);
+         winston.info ("Running the cloc command");
+         winston.debug (command);
          exec (command, function (error, stdout, stderr) {
 
             if (error) {
                bot.message (channel, 'I\'m afraid there was an error with the !cloc command.');
-               console.log (error);
+               winston.error (error);
             } else {
                // The cloc command returns CSV like so:
                // files,language,blank,comment,code,"http://cloc.sourceforge.net v 1.60  T=0.05 s (38.1 files/s, 4226.8 lines/s)"
@@ -47,10 +49,11 @@ module.exports = {
                      }
                   }
 
+                  winston.debug ("cloc complete: " + totals ["sum"]);
                   var message = "The project is currently " + totals ["sum"] + " lines of code.";
                   bot.message (channel, message);
                } catch (ex) {
-                  console.log (ex);
+                  winston.error (ex);
                }
             }
          });

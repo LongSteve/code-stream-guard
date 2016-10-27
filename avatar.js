@@ -13,6 +13,7 @@
 
 var _ = require ('lodash');
 
+var winston = require ('winston');
 var request = require ('request');
 var cheerio = require('cheerio');
 
@@ -21,13 +22,14 @@ var Avatar = function Avatar () {
 
    self.requestImage = function requestImage (username, callback) {
       var url = 'https://livecoding.tv/' + username.toLowerCase () + '/profile';
+      winston.debug ("Requesting profile url: " + url);
       request (url, function (error, response, html) {
 
          // Default avatar image in case anything goes wrong
          var avatar_url = 'https://www.livecoding.tv/static/img/userdashboard-img.png';
 
          if (error) {
-            console.log ("Error retrieving profile: " + error);
+            winston.error ("Error retrieving profile: " + error);
             if (typeof callback === 'function') {
                callback (error, avatar_url);
             }
@@ -46,6 +48,7 @@ var Avatar = function Avatar () {
             // Return the static default image if we can't get the profile
             return_url = avatar_url;
          }
+         winston.debug ("Returning image url:" + return_url);
          if (typeof callback === 'function') {
             callback (null, return_url);
          }
