@@ -4,10 +4,10 @@
 //   node app
 //
 // then point a web browser to http://localhost:3000 to get the front end
-// UI panels.  However, you can also run the app using Node Webkit, using
+// UI panels.  However, you can also run the app using Electron, using
 // the included ./run command, or:
 //
-//   ./node_modules/nw/bin/nw .
+//   ./node_modules/.bin/electron .
 //
 
 //
@@ -32,6 +32,58 @@ var argv = require ('minimist') (process.argv.slice(2));
 
 // Remove the default console logger
 winston.remove(winston.transports.Console);
+
+//
+// Electron Front End
+//
+var app = require('electron').app;  // Module to control application life.
+var BrowserWindow = require('electron').BrowserWindow;  // Module to create native browser window.
+
+// Keep a global reference of the window object, if you don't, the window will
+// be closed automatically when the JavaScript object is garbage collected.
+var mainWindow = null;
+
+// Quit when all windows are closed.
+app.on('window-all-closed', function() {
+    // On OS X it is common for applications and their menu bar
+    // to stay active until the user quits explicitly with Cmd + Q
+    if (process.platform != 'darwin') {
+        app.quit();
+    }
+});
+
+// This method will be called when Electron has finished
+// initialization and is ready to create browser windows.
+app.on('ready', function() {
+    var winOpts = {
+       width: 240, 
+       height: 420, 
+       resizable: false
+    };
+
+    if (argv.transparent) {
+       winOpts.frame = false;
+       winOpts.transparent = true;
+    } else {
+       winOpts.backgroundColor ="#000000";
+    }
+
+    // Create the browser window.
+    mainWindow = new BrowserWindow (winOpts);
+
+    // and load the index.html of the app.
+    mainWindow.loadURL('http://localhost:3000/index.html');
+
+    //mainWindow.webContents.openDevTools()
+
+    // Emitted when the window is closed.
+    mainWindow.on('closed', function() {
+        // Dereference the window object, usually you would store windows
+        // in an array if your app supports multi windows, this is the time
+        // when you should delete the corresponding element.
+        mainWindow = null;
+    });
+});
 
 //
 // Custom log levels

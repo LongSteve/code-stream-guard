@@ -1,25 +1,11 @@
 {
   "name": "code-stream-guard",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A Chat Bot for Live Coding Streamers",
-  "main": "http://localhost:3000/index.html",
-  "node-remote": "http://localhost",
-  "node-main": "app.js",
-  "chromium-args": "--data-path='./saved/'",
-  "window": {
-    "title": "Code Stream Guard",
-    "width": 216,
-    "height": 384,
-    "background-color": "#000000",
-    "resizable": true,
-    "frame": false,
-    "transparent": true,
-    "show": true,
-    "show_in_taskbar": false
-  },
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "run": "./node_modules/nw/bin/nw --enable-logging=stderr ."
+    "run": "./node_modules/.bin/electron ."
   },
   "repository": {
     "type": "git",
@@ -43,6 +29,7 @@
   "homepage": "https://github.com/LongSteve/code-stream-guard#readme",
   "dependencies": {
     "cheerio": "^0.22.0",
+    "electron": "^1.4.5",
     "express": "^4.14.0",
     "feedparser": "^1.1.5",
     "jsonfile": "^2.4.0",
@@ -50,7 +37,6 @@
     "minimist": "^1.2.0",
     "node-schedule": "^1.1.1",
     "node-xmpp-client": "^3.0.2",
-    "nw": "^0.18.0",
     "request": "^2.75.0",
     "socket.io": "^1.5.0",
     "winston": "^2.2.0"

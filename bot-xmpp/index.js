@@ -5,7 +5,7 @@
 //
 
 var xmpp = require("node-xmpp-client");
-var ltx = require('node-xmpp-client/node_modules/node-xmpp-core/index.js').ltx;
+var ltx = require('node-xmpp-core').ltx;
 var util = require('util');
 var events = require('events');
 

@@ -1,8 +1,11 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <!-- Fix to allow Electron to load jQuery  -->
+    <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+
     <!-- winstate.js from https://github.com/azu/node-webkit-winstate and allows the window state to be saved -->
-    <script src="js/winstate.js"></script>
+    <!-- <script src="js/winstate.js"></script> -->
 
     <!-- jQuery obviously, and the GaugeMeter plugin from https://github.com/AshAlom/GaugeMeter -->
     <script src="lib/jquery-3.1.1.min.js"></script>
@@ -13,6 +16,9 @@
 
     <!-- Stylesheet for the fireworks, follower and rating areas -->
     <link type="text/css" href="css/frontend.css" rel="stylesheet" />
+
+    <!-- Post jQuery/Electron fix -->
+    <script>if (window.module) module = window.module;</script>
 
     <title>Code Stream Guard Display</title>
   </head>

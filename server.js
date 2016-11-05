@@ -28,7 +28,7 @@ var Server = function Server () {
    });
 
    app.get ('/socket.io.js', function (req, res) {
-     res.sendFile (__dirname + '/node_modules/socket.io/node_modules/socket.io-client/socket.io.js');
+     res.sendFile (__dirname + '/node_modules/socket.io-client/socket.io.js');
    });
 
    http.listen (3000, function () {
