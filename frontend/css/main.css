@@ -1,0 +1,18 @@
+.form-config {
+   margin: 20px;
+}
+
+.hidden {
+   display: none;
+}
+
+.active {
+   display: flex;
+}
+
+.center-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+

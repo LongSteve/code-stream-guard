@@ -15,13 +15,6 @@ var xmppbot = require ('./bot-xmpp');
 var config = require ('./config.js');
 var strings = require ('./strings.js');
 
-//
-// Ideas for commands:
-//   !spaces or !tabs
-//   !vote
-//   !rate (!rating)
-//
-
 var Chatter = function Chatter () {
    var self = this;
 

@@ -34,6 +34,12 @@ var argv = require ('minimist') (process.argv.slice(2));
 winston.remove(winston.transports.Console);
 
 //
+// Some development time constants
+//
+var ENABLE_FOLLOWERS_FEED = true;
+var ENABLE_CHAT_BOT = true;
+
+//
 // Electron Front End
 //
 var app = require('electron').app;  // Module to control application life.
@@ -42,6 +48,7 @@ var BrowserWindow = require('electron').BrowserWindow;  // Module to create nati
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 var mainWindow = null;
+var indicatorWindow = null;
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function() {
@@ -54,35 +61,29 @@ app.on('window-all-closed', function() {
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
-app.on('ready', function() {
-    var winOpts = {
-       width: 240, 
-       height: 420, 
-       resizable: false
-    };
+app.on ('ready', function () {
 
-    if (argv.transparent) {
-       winOpts.frame = false;
-       winOpts.transparent = true;
-    } else {
-       winOpts.backgroundColor ="#000000";
-    }
+   mainWindow = new BrowserWindow ({
+     width: 920,
+     height: 770,
+     'min-width': 500,
+     'min-height': 200,
+     'accept-first-mouse': true,
+     'title-bar-style': 'hidden'
+   });
 
-    // Create the browser window.
-    mainWindow = new BrowserWindow (winOpts);
+   mainWindow.loadURL ('http://localhost:3000/main.html');
+   if (argv.debug) {
+      mainWindow.webContents.openDevTools();
+   }
 
-    // and load the index.html of the app.
-    mainWindow.loadURL('http://localhost:3000/index.html');
-
-    //mainWindow.webContents.openDevTools()
-
-    // Emitted when the window is closed.
-    mainWindow.on('closed', function() {
-        // Dereference the window object, usually you would store windows
-        // in an array if your app supports multi windows, this is the time
-        // when you should delete the corresponding element.
-        mainWindow = null;
-    });
+   mainWindow.on ('closed', function() {
+      if (indicatorWindow) {
+         indicatorWindow.close ();
+         indicatorWindow = null;
+      }
+      mainWindow = null;
+   });
 });
 
 //
@@ -140,119 +141,166 @@ var Avatar = require ('./avatar.js');
 // Start the web (and websocket) server
 //
 var server = require ('./server.js');
-var socket = null;
-server.on ('connected', function (_socket) {
-   socket = _socket;
-});
 
-server.on ('disconnected', function (_socket) {
-   if (socket === _socket) {
-      socket = null;
+server.on ('window', function (_socket, data) {
+
+   winston.verbose ("server window event");
+
+   if (data.action == "close" && data.name == "indicator" && indicatorWindow) {
+      winston.verbose ("Request to close indicator window");
+      indicatorWindow.close ();
+   }
+
+   if (data.action == "show" && data.name == "indicator" && !indicatorWindow) {
+      winston.verbose ("Request to show indicator window");
+
+      var winOpts = {
+         width: 240, 
+         height: 420, 
+         resizable: true,
+         show: false
+      };
+
+      if (data.transparent) {
+         winOpts.frame = false;
+         winOpts.transparent = true;
+      } else {
+         winOpts.backgroundColor ="#000000";
+      }
+
+      // Create the browser window.
+      indicatorWindow = new BrowserWindow (winOpts);
+
+      // and load the index.html of the app.
+      indicatorWindow.loadURL('http://localhost:3000/indicator.html');
+      //indicatorWindow.webContents.openDevTools ();
+
+      indicatorWindow.on ('ready-to-show', function () {
+         indicatorWindow.show ();
+         winston.verbose ("Indicator window shown");
+         server.toClient ("window", {"name": "indicator", "event": "show"}, _socket);
+      });
+
+      // Emitted when the window is closed.
+      indicatorWindow.on ('closed', function () {
+          // Dereference the window object, usually you would store windows
+          // in an array if your app supports multi windows, this is the time
+          // when you should delete the corresponding element.
+
+          winston.verbose ("Indicator window closed");
+
+          server.toClient("window", { "name": "indicator", "event": "close" }, _socket);
+
+          indicatorWindow = null;
+      });
    }
 });
 
 //
 // Kick off the follower feed checking
 //
-var followers = require ('./followers.js');
 
-//
-// Attach to the chat channel and monitor/respond as a bot
-//
-var chatter = require ('./chatter.js');
+if (ENABLE_FOLLOWERS_FEED) {
 
-// The followed event is emitted, passed with an array of follower names
-followers.on ('followed', function (followers) {
-   winston.info ('New followers: ' + followers);
-   followers.forEach (function (f) {
-      chatter.sendMessage (strings.get ('chat-new-follower', {'name': f}));
+   var followers = require ('./followers.js');
 
-      if (socket) {
+   //
+   // Attach to the chat channel and monitor/respond as a bot
+   //
+   var chatter = require ('./chatter.js');
+
+   // The followed event is emitted, passed with an array of follower names
+   followers.on ('followed', function (followers) {
+      winston.info ('New followers: ' + followers);
+      followers.forEach (function (f) {
+         chatter.sendMessage (strings.get ('chat-new-follower', {'name': f}));
+
          var av = new Avatar ();
          av.requestImage (f, function requestImageCallback (error, image_url) {
-            server.toClient (socket, 'new follower', {
+            server.toClient ('new follower', {
                'nickname': f,
                'image_url': image_url,
                'message': strings.get ('frontend-latest-follower', {'name': f})
             });
          });
+      });
+   });
+
+   // The unfollowed event is emitted, with an array of follower names
+   followers.on ('unfollowed', function (followers) {
+      winston.info ('Unfollowed: ' + followers);
+      followers.forEach (function (f) {
+         chatter.sendMessage (strings.get ('chat-unfollowed', {'name': f}));
+      });
+   });
+}
+
+if (ENABLE_CHAT_BOT) {
+
+   // Store a map of viewers for the session (in memory)
+   var viewers = {};
+
+   // The joined event is emitted with a single nickname
+   chatter.on ('joined', function (nickname) {
+
+      winston.info ((followers.isFollower (nickname) ? 'Follower ': '') + nickname + ' joined the chat room');
+
+      var now = new Date;
+      if (viewers [nickname]) {
+         viewers [nickname].join_count++;
+         viewers [nickname].last_joined = now;
+      } else {
+         // Not seen this viewer before
+         viewers [nickname] = {
+            first_joined: now,
+            last_joined: now,
+            last_left: null,
+            join_count: 1,
+            last_greeted_at: null,
+            avatar_last_shown_at: null,
+            greeting_timer: null
+         };
       }
-   });
-});
 
-// The unfollowed event is emitted, with an array of follower names
-followers.on ('unfollowed', function (followers) {
-   winston.info ('Unfollowed: ' + followers);
-   followers.forEach (function (f) {
-      chatter.sendMessage (strings.get ('chat-unfollowed', {'name': f}));
-   });
-});
+      winston.debug (nickname + " seen " + viewers [nickname].join_count + "time(s), first joined at: " + viewers [nickname].join_count);
 
-// Store a map of viewers for the session (in memory)
-var viewers = {};
+      // Set the timer for default 3 seconds that announces new joiners.  The timeout is so that
+      // anyone joining and leaving very quickly doesn't spam the announcement
+      var timeout = config ['greenting-timeout'] || 3000;
 
-// The joined event is emitted with a single nickname
-chatter.on ('joined', function (nickname) {
+      // Greeting timer already set?
+      if (viewers [nickname].greeting_timer) {
+         winston.warn ("Greeting timer already running for: " + nickname);
+         return;
+      }
 
-   winston.info ((followers.isFollower (nickname) ? 'Follower ': '') + nickname + ' joined the chat room');
+      var greet = function delayedGreet (name) {
+         return function greetNow () {
 
-   var now = new Date;
-   if (viewers [nickname]) {
-      viewers [nickname].join_count++;
-      viewers [nickname].last_joined = now;
-   } else {
-      // Not seen this viewer before
-      viewers [nickname] = {
-         first_joined: now,
-         last_joined: now,
-         last_left: null,
-         join_count: 1,
-         last_greeted_at: null,
-         avatar_last_shown_at: null,
-         greeting_timer: null
-      };
-   }
+            var isFollower = followers.isFollower (name);
 
-   winston.debug (nickname + " seen " + viewers [nickname].join_count + "time(s), first joined at: " + viewers [nickname].join_count);
+            // Clear the saved timer
+            viewers [name].greeting_timer = null;
 
-   // Set the timer for default 3 seconds that announces new joiners.  The timeout is so that
-   // anyone joining and leaving very quickly doesn't spam the announcement
-   var timeout = config ['greenting-timeout'] || 3000;
+            var greetDate = new Date;  // don't use now, it'll be 3 seconds behind!
 
-   // Greeting timer already set?
-   if (viewers [nickname].greeting_timer) {
-      winston.warn ("Greeting timer already running for: " + nickname);
-      return;
-   }
-
-   var greet = function delayedGreet (name) {
-      return function greetNow () {
-
-         var isFollower = followers.isFollower (name);
-
-         // Clear the saved timer
-         viewers [name].greeting_timer = null;
-
-         var greetDate = new Date;  // don't use now, it'll be 3 seconds behind!
-
-         if (nickname !== config.channel) {
-            if (viewers [name].last_greeted_at) {
-               winston.info ("Already greeted " + name + " at " + viewers [name].last_greeted_at);
-            } else {
-               winston.info ("Sending greetings to " + name);
-               chatter.sendMessage (strings.get (isFollower ? 'chat-welcome-follower' : 'chat-welcome-normal', { 'name': name }));
-               viewers [name].last_greeted_at = greetDate;
+            if (nickname !== config.channel) {
+               if (viewers [name].last_greeted_at) {
+                  winston.info ("Already greeted " + name + " at " + viewers [name].last_greeted_at);
+               } else {
+                  winston.info ("Sending greetings to " + name);
+                  chatter.sendMessage (strings.get (isFollower ? 'chat-welcome-follower' : 'chat-welcome-normal', { 'name': name }));
+                  viewers [name].last_greeted_at = greetDate;
+               }
             }
-         }
 
-         if (socket) {
             if (!isFollower && viewers [name].avatar_last_shown_at) {
                winston.info ("Already shown avatar for " + name + " at " + viewers [name].avatar_last_shown_at);
             } else {
                var av = new Avatar ();
                av.requestImage (name, function requestImageCallback (error, image_url) {
                   winston.info ("Showing greeting avatar for " + name);
-                  server.toClient (socket, 'new joiner', {
+                  server.toClient ('new joiner', {
                      'nickname': name,
                      'image_url': image_url,
                      'message': strings.get ('frontend-welcome', {'name': name}),
@@ -261,35 +309,33 @@ chatter.on ('joined', function (nickname) {
                   viewers [name].avatar_last_shown_at = new Date;    // new date, since image url request takes some time
                });
             }
-         }
+         };
       };
-   };
 
-   winston.debug ("Setting greeting timer " + timeout + " for " + nickname);
-   viewers [nickname].greeting_timer = setTimeout (greet (nickname), timeout);
+      winston.debug ("Setting greeting timer " + timeout + " for " + nickname);
+      viewers [nickname].greeting_timer = setTimeout (greet (nickname), timeout);
 
-});
-
-// The left event is emitted with a single nickname
-chatter.on ('left', function (nickname) {
-   winston.info (nickname + ' left the chat room');
-      if (viewers [nickname]) {
-         viewers [nickname].last_left = new Date;
-         if (viewers [nickname].greeting_timer) {
-            winston.debug ("Cancelling greeting timer for " + nickname);
-            clearTimeout (viewers [nickname].greeting_timer);
-            viewers [nickname].greeting_timer = null;
-         }
-      }
    });
 
-// Someone has rated, send a message to the UI to display it
-chatter.on ('rating', function (event) {
-   winston.info (event.nickname + ' has given a rating: ' + event.rating);
-   if (socket) {
-      server.toClient (socket, 'new rating', {'percent': event.rating});
-   }
-});
+   // The left event is emitted with a single nickname
+   chatter.on ('left', function (nickname) {
+      winston.info (nickname + ' left the chat room');
+         if (viewers [nickname]) {
+            viewers [nickname].last_left = new Date;
+            if (viewers [nickname].greeting_timer) {
+               winston.debug ("Cancelling greeting timer for " + nickname);
+               clearTimeout (viewers [nickname].greeting_timer);
+               viewers [nickname].greeting_timer = null;
+            }
+         }
+      });
+
+   // Someone has rated, send a message to the UI to display it
+   chatter.on ('rating', function (event) {
+      winston.info (event.nickname + ' has given a rating: ' + event.rating);
+      server.toClient ('new rating', {'percent': event.rating});
+   });
+}
 
 //
 // Handle CTRL-C and send the goodbye message to the chat room

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Code Stream Guard</title>
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/photon.min.css"></link>
+    <link rel="stylesheet" href="css/main.css"></link>
+
+    <!-- Fix to allow Electron to load jQuery  -->
+    <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+
+    <!-- winstate.js from https://github.com/azu/node-webkit-winstate and allows the window state to be saved -->
+    <!--<script src="js/winstate.js"></script> -->
+
+    <!-- jQuery obviously -->
+    <script src="lib/jquery-3.1.1.min.js"></script>
+
+    <!-- socket.io.js is served by the Express backend with a specific route -->
+    <script src="socket.io.js"></script>
+
+    <!-- Post jQuery/Electron fix -->
+    <script>if (window.module) module = window.module;</script>
+  </head>
+  <body>
+    <div class="window">
+      <!-- .toolbar-header sits at the top of your app -->
+      <header class="toolbar toolbar-header">
+        <h1 class="title">Code Stream Guard</h1>
+      </header>
+
+      <!-- Your app's content goes inside .window-content -->
+      <div class="window-content">
+        <div class="pane-group">
+          <div class="pane pane-sm sidebar">
+            <nav class="nav-group">
+              <h5 class="nav-group-title">Functions</h5>
+              <span class="nav-group-item" id="nav-window">
+                <span class="icon icon-window"></span>
+                Windows
+              </span>
+              <span class="nav-group-item" id="nav-config">
+                <span class="icon icon-cog"></span>
+                Configuration
+              </span>
+            </nav>
+          </div>
+          <div class="pane center-container" id="pane-window">
+              <div>
+                  <button class="btn btn-large btn-default" id="btn-show-indicator-window">Show Indicator Window</button>
+                  <br/>
+                  <label>
+                    <input type="checkbox" id="chk-transparent"> Transparent&nbsp;/&nbsp;Frameless
+                  </label>
+              </div>
+          </div>
+          <div class="pane hidden" id="pane-config">
+            <form class="form-config">
+              <div class="form-group">              
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox"> Enter Chat Room
+                  </label>
+                </div>
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox"> Watch Followers Feed
+                  </label>
+                </div>             
+              </div>
+              <div class="form-group">
+                <label>Domain</label>
+                <input type="text" class="form-control" placeholder="chat.livecoding.tv">
+              </div>
+              <div class="form-group">
+                <label>Channel</label>
+                <input type="text" class="form-control" placeholder="channel">
+              </div>
+              <div class="form-group">
+                <label>Nickname</label>
+                <input type="email" class="form-control" placeholder="tim_havers@livecoding.tv">
+              </div>
+              <div class="form-group">
+                <label>Password</label>
+                <input type="password" class="form-control" placeholder="password">
+              </div>
+              <div class="form-group">
+                <label>Chat Name</label>
+                <input type="text" class="form-control" placeholder="chatname">
+              </div>
+              <div class="form-group">
+                <label>Owner</label>
+                <input type="text" class="form-control" placeholder="steve">
+              </div>
+              <div class="form-group">
+                <label>Followers Feed URL</label>
+                <input type="text" class="form-control" placeholder="https://www.livecoding.tv/rss/longsteve/followers/?key=secret">
+              </div>
+              <div class="form-group">
+                <label>CLOC Command</label>
+                <input type="text" class="form-control" placeholder="cloc --exclude-dir=node_modules,frameworks --exclude-lang=CMake --progress-rate=0 --csv --quiet .">
+              </div>
+              <hr/>
+              <div class="form-actions">
+                <button type="submit" class="btn btn-form btn-default">Cancel</button>
+                <button type="submit" class="btn btn-form btn-primary">OK</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <script>
+  
+   $ ().ready (
+      function () {
+
+         //
+         // Click handlers for the sidebar
+         //
+         $("#nav-window").click (function () {
+           $("#pane-config").hide ();
+           $("#pane-window").show ();     
+         });
+
+         $("#nav-config").click (function () {
+           $("#pane-window").hide ();
+           $("#pane-config").show ();     
+         });
+
+         //
+         // Socket.io to communicate with the backend Express instance
+         //
+         var socket = io ();
+
+         var indicatorWindowVisible = false;
+
+         socket.on ('window', function (event) {
+               if (event.name == 'indicator' && event.event == 'show') {
+                  indicatorWindowVisible = true;
+                  $('#btn-show-indicator-window').text ('Close Indicator Window');
+               }
+
+               if (event.name == 'indicator' && event.event == 'close') {
+                  indicatorWindowVisible = false;
+                  $('#btn-show-indicator-window').text ('Show Indicator Window');
+               }
+            });
+
+         $('#btn-show-indicator-window').click (function () {
+            if (indicatorWindowVisible) {
+               socket.emit('window', { 'action': 'close', 'name': 'indicator' });               
+            } else {
+               socket.emit('window', { 'action': 'show', 'name': 'indicator', 'transparent': $('#chk-transparent').is(":checked") });
+            }
+         });
+      }
+   );
+
+  </script>
+  </body>
+</html>

@@ -13,6 +13,8 @@ var EventEmitter = require ('events').EventEmitter;
 
 var http = require('http');
 
+var sockets = [];
+
 var Server = function Server () {
    var self = this;
 
@@ -23,9 +25,9 @@ var Server = function Server () {
 
    app.use (express.static (__dirname + '/frontend/'));
 
-   app.get ('/', function (req, res) {
-     res.sendFile (__dirname + '/frontend/index.html');
-   });
+   //app.get ('/', function (req, res) {
+   //  res.sendFile (__dirname + '/frontend/index.html');
+   //});
 
    app.get ('/socket.io.js', function (req, res) {
      res.sendFile (__dirname + '/node_modules/socket.io-client/socket.io.js');
@@ -37,19 +39,30 @@ var Server = function Server () {
 
    io.on ('connection', function (_socket) {
      winston.info ('front end connected');
-     socket = _socket;
+     sockets.push (_socket);
 
      self.emit ('connected', _socket);
-     socket.on ('disconnect', function () {
+     _socket.on ('disconnect', function () {
        winston.info ('front end disconnected');
        self.emit ('disconnected', _socket);
      });
+
+     _socket.on ('window', function (data) {
+        winston.info ('window event: ' + JSON.stringify (data));
+        self.emit ('window', _socket, data);
+     });
+
    });
 
-   self.toClient = function (_socket, name, event) {
+   self.toClient = function (name, event, _socket) {
       if (_socket) {
-         winston.debug ("Socket emit: " + name);
+         winston.debug ("Single socket emit: " + name);
          _socket.emit (name, event);
+      } else {
+         winston.debug ("All socket emit: " + name);
+         sockets.forEach (function (_s) {
+            _s.emit (name, event);
+         });
       }
    };
 };

@@ -33,6 +33,10 @@ livecoding.tv is supported, using the XMPP chat connection.
 1. Clean up the window setup from new, postion and transparency are awkward
 1. Add sound effects
 1. Add more chat commands
+ * !spaces or !tabs
+ * !vote
+ * !joke
+ * !fortune
 1. Allow multiple front end connections (for indicator lights or other hardware)
 
 # Inspiration

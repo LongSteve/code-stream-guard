@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # For running with a transparent window
-./node_modules/.bin/electron --enable-transparent-visuals . --transparent
+./node_modules/.bin/electron --enable-transparent-visuals . --transparent $*
 
 # For running with a black background and frame
 #./node_modules/.bin/electron .
