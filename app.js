@@ -21,6 +21,11 @@ var _ = require ('lodash');
 var jsonfile = require ('jsonfile');
 
 //
+// Nothing else needed for date/time handing
+//
+var moment = require ('moment');
+
+//
 // Logging with Winston
 //
 var winston = require ('winston');
@@ -29,6 +34,11 @@ var winston = require ('winston');
 // Minimist for command line arg parsing
 //
 var argv = require ('minimist') (process.argv.slice(2));
+
+//
+// App-Root-Path seems like a good idea
+//
+var __approot = require('app-root-path');
 
 // Remove the default console logger
 winston.remove(winston.transports.Console);
@@ -114,7 +124,7 @@ var fileLogger = new (winston.transports.File)({
    timestamp: true,
    colorize: false,
    json: false,
-   filename: __dirname + '/debug.log'
+   filename: __approot + '/debug.log'
 });
 
 winston.add (consoleLogger, {}, true);
@@ -126,21 +136,21 @@ winston.addColors (CustomLevels.colors);
 //
 // Get the config settings and strings
 //
-var config = require ('./config.js');
+var config = require (__approot + '/modules/config.js');
 config.init ('livecoding.tv');
 
-var strings = require ('./strings.js');
+var strings = require (__approot + '/modules/strings.js');
 strings.init ();
 
 //
 // The avatar url fetcher class
 //
-var Avatar = require ('./avatar.js');
+var Avatar = require (__approot + '/modules/avatar.js');
 
 //
 // Start the web (and websocket) server
 //
-var server = require ('./server.js');
+var server = require (__approot + '/modules/server.js');
 
 server.on ('window', function (_socket, data) {
 
@@ -202,18 +212,15 @@ server.on ('window', function (_socket, data) {
 
 if (ENABLE_FOLLOWERS_FEED) {
 
-   var followers = require ('./followers.js');
-
-   //
-   // Attach to the chat channel and monitor/respond as a bot
-   //
-   var chatter = require ('./chatter.js');
+   var followers = require (__approot + '/modules/followers.js');
 
    // The followed event is emitted, passed with an array of follower names
    followers.on ('followed', function (followers) {
       winston.info ('New followers: ' + followers);
       followers.forEach (function (f) {
-         chatter.sendMessage (strings.get ('chat-new-follower', {'name': f}));
+         if (chatter) {
+            chatter.sendMessage(strings.get('chat-new-follower', { 'name': f }));
+         }
 
          var av = new Avatar ();
          av.requestImage (f, function requestImageCallback (error, image_url) {
@@ -229,13 +236,20 @@ if (ENABLE_FOLLOWERS_FEED) {
    // The unfollowed event is emitted, with an array of follower names
    followers.on ('unfollowed', function (followers) {
       winston.info ('Unfollowed: ' + followers);
-      followers.forEach (function (f) {
-         chatter.sendMessage (strings.get ('chat-unfollowed', {'name': f}));
-      });
+      if (chatter) {
+         followers.forEach(function(f) {
+            chatter.sendMessage (strings.get ('chat-unfollowed', {'name': f}));
+         });
+      }
    });
 }
 
 if (ENABLE_CHAT_BOT) {
+
+   //
+   // Attach to the chat channel and monitor/respond as a bot
+   //
+   var chatter = require (__approot + '/modules/chatter.js');
 
    // Store a map of viewers for the session (in memory)
    var viewers = {};
@@ -347,8 +361,10 @@ process.on ('SIGINT', function () {
     }
 
     // Save the viewers data as json file, for later inspection
-    jsonfile.writeFile ("viewers.json", viewers, function wroteJsonViewersFile () {
-       winston.debug ("Saved viewers.json");
+    var dateString = moment().format('YYYYMMDD_HHmm');
+    var savedViewersFilename = "viewers_" + dateString + ".json";
+    jsonfile.writeFile (__approot + "/saved/" + savedViewersFilename, viewers, function wroteJsonViewersFile () {
+       winston.debug ("Saved viewers to json file: " + savedViewersFilename);
        // Delay the exit by a few millis to give the message time to be sent
        setTimeout (function () {
           process.exit ();

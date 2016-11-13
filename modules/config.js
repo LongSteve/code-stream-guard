@@ -3,11 +3,13 @@
 // used throughout the code.
 //
 
+var __approot = require('app-root-path');
+
 function Config () {
 }
 
 Config.prototype.init = function init (root) {
-   var config = require ('./config.json')[root];
+   var config = require (__approot + '/config.json')[root];
    for (var property in config) {
       if (config.hasOwnProperty (property)) {
          Object.defineProperty (this, property, { value: config [property], writable: false, enumerable : true, configurable : false} );

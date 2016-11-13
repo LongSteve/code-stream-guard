@@ -13,6 +13,8 @@ var EventEmitter = require ('events').EventEmitter;
 
 var http = require('http');
 
+var __approot = require('app-root-path');
+
 var sockets = [];
 
 var Server = function Server () {
@@ -23,14 +25,14 @@ var Server = function Server () {
    var http = require ('http').Server (app);
    var io = require ('socket.io') (http);
 
-   app.use (express.static (__dirname + '/frontend/'));
+   app.use (express.static (__approot + '/frontend/'));
 
    //app.get ('/', function (req, res) {
    //  res.sendFile (__dirname + '/frontend/index.html');
    //});
 
    app.get ('/socket.io.js', function (req, res) {
-     res.sendFile (__dirname + '/node_modules/socket.io-client/socket.io.js');
+     res.sendFile (__approot + '/node_modules/socket.io-client/socket.io.js');
    });
 
    http.listen (3000, function () {

@@ -9,11 +9,13 @@ var winston = require ('winston');
 var fs = require ('fs');
 var util = require ('util');
 
+var __approot = require('app-root-path');
+
 var EventEmitter = require ('events').EventEmitter;
 
-var xmppbot = require ('./bot-xmpp');
-var config = require ('./config.js');
-var strings = require ('./strings.js');
+var xmppbot = require (__approot + '/modules/xmpp.js');
+var config = require (__approot + '/modules/config.js');
+var strings = require (__approot + '/modules/strings.js');
 
 var Chatter = function Chatter () {
    var self = this;
@@ -30,10 +32,10 @@ var Chatter = function Chatter () {
    //
    // Load the set of dynamic commands from the commands folder
    //
-   fs.readdirSync (__dirname + '/commands/').forEach (function (file) {
+   fs.readdirSync (__approot + '/commands/').forEach (function (file) {
       if (file.match (/.+\.js/g) !== null) {
          var name = file.replace ('.js', '');
-         commands [name] = require ('./commands/' + file);
+         commands [name] = require (__approot + '/commands/' + file);
          commands [name].init (self, config, strings, bot);
 
          winston.info ('Loaded the ' + name + ' chatter module.');

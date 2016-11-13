@@ -5,13 +5,15 @@
 // for their own purposes.
 //
 
+var __approot = require('app-root-path');
+
 function Strings () {
 }
 
 Strings.prototype.init = function init () {
    var self = this;
 
-   var strings = require ('./strings.json');
+   var strings = require (__approot + '/strings.json');
 
    self.get = function getString (id, inserts) {
       if (!id) {

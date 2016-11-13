@@ -9,8 +9,10 @@ var winston = require ('winston');
 
 var jsonfile = require ('jsonfile');
 
+var __approot = require('app-root-path');
+
 // Load the currently known ratings from the json file
-var jsonFilename = __dirname + '/../saved/ratings.json';
+var jsonFilename = __approot + '/saved/ratings.json';
 
 module.exports = {
    name: 'rate',

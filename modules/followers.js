@@ -10,7 +10,9 @@ var util = require ('util');
 var request = require ('request');
 var schedule = require ('node-schedule');
 
-var config = require ('./config.js');
+var __approot = require('app-root-path');
+
+var config = require (__approot + '/modules/config.js');
 
 var FeedParser = require ('feedparser');
 
@@ -22,7 +24,7 @@ var EventEmitter = require ('events').EventEmitter;
 var jsonfile = require ('jsonfile');
 
 // Load the currently known followers list from the json file
-var jsonFilename = __dirname + '/saved/followers.json';
+var jsonFilename = __approot + '/saved/followers.json';
 
 var Followers = function Followers () {
    var self = this;
