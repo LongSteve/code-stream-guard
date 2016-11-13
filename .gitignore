@@ -39,6 +39,10 @@ jspm_packages
 # Mac
 .DS_Store
 
+# SlickEdit history and tag files
+*.vpwhistu
+*.vtg
+
 # Project specific ignores
 config.json
 viewers.json
