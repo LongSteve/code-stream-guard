@@ -21,6 +21,16 @@ var _ = require ('lodash');
 var jsonfile = require ('jsonfile');
 
 //
+// readdirp for reading and loading plugin files recursively
+//
+var readdirp = require ('readdirp');
+
+//
+// Async cause I've used it for so long now
+//
+var async = require ('async');
+  
+//
 // Nothing else needed for date/time handing
 //
 var moment = require ('moment');
@@ -44,12 +54,6 @@ var __approot = require('app-root-path');
 winston.remove(winston.transports.Console);
 
 //
-// Some development time constants
-//
-var ENABLE_FOLLOWERS_FEED = true;
-var ENABLE_CHAT_BOT = true;
-
-//
 // Electron Front End
 //
 var app = require('electron').app;  // Module to control application life.
@@ -62,6 +66,7 @@ var indicatorWindow = null;
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function() {
+
     // On OS X it is common for applications and their menu bar
     // to stay active until the user quits explicitly with Cmd + Q
     if (process.platform != 'darwin') {
@@ -95,6 +100,10 @@ app.on ('ready', function () {
       mainWindow = null;
    });
 });
+
+app.on ('before-quit', function() {
+    quit ();
+})
 
 //
 // Custom log levels
@@ -209,165 +218,87 @@ server.on ('window', function (_socket, data) {
 //
 // Kick off the follower feed checking
 //
+var followers = require (__approot + '/modules/followers.js');
 
-if (ENABLE_FOLLOWERS_FEED) {
+//
+// Kick off the chat bot connection to the XMPP chat
+//
+var chatter = require (__approot + '/modules/chatter.js');
 
-   var followers = require (__approot + '/modules/followers.js');
+//
+// Load and init all plugins
+//
+var plugins = [];
 
-   // The followed event is emitted, passed with an array of follower names
-   followers.on ('followed', function (followers) {
-      winston.info ('New followers: ' + followers);
-      followers.forEach (function (f) {
-         if (chatter) {
-            chatter.sendMessage(strings.get('chat-new-follower', { 'name': f }));
+//
+// readdirp recurses down directories
+//
+readdirp ({ root: __approot + '/plugins', fileFilter: [ '*.js'] }, 
+
+   function (entry) { 
+      var name = entry.name.replace ('.js', '');
+      winston.verbose ("Loading plugin: " + name);
+      var p = require (entry.fullPath);
+      p.name = name;
+      plugins.push (p);
+   },
+
+   function (error, files) {
+   
+      if (error) {
+         winston.error ("Error reading plugin files: " + error);
+         process.exit (1);
+      }
+
+      winston.verbose ("Initialising " + plugins.length  + " plugins");
+
+      async.each (plugins, 
+         function (plugin, cb) {
+            // do something with each JavaScript file entry
+            winston.info ("Initialising plugin: " + plugin.name);
+            plugin.init (cb);
+         },
+
+         function (error) {
+            if (error) {
+               winston.error ("Error initialising plugin file: " + error);
+               process.exit (1);
+            }
+
+            winston.verbose ("All plugins loaded");
          }
-
-         var av = new Avatar ();
-         av.requestImage (f, function requestImageCallback (error, image_url) {
-            server.toClient ('new follower', {
-               'nickname': f,
-               'image_url': image_url,
-               'message': strings.get ('frontend-latest-follower', {'name': f})
-            });
-         });
-      });
+      );
    });
 
-   // The unfollowed event is emitted, with an array of follower names
-   followers.on ('unfollowed', function (followers) {
-      winston.info ('Unfollowed: ' + followers);
-      if (chatter) {
-         followers.forEach(function(f) {
-            chatter.sendMessage (strings.get ('chat-unfollowed', {'name': f}));
-         });
-      }
-   });
-}
+//
+// Terminate the plugins at app exit
+//
+function quit () {
 
-if (ENABLE_CHAT_BOT) {
+   if (chatter) {
+      chatter.sendMessage (strings.get ('chat-bot-leaving'));
+   }
 
-   //
-   // Attach to the chat channel and monitor/respond as a bot
-   //
-   var chatter = require (__approot + '/modules/chatter.js');
+   async.each (plugins, 
+      function (plugin, cb) {
+         winston.info ("Terminating plugin: " + plugin.name);
+         plugin.term (cb);
+      },
 
-   // Store a map of viewers for the session (in memory)
-   var viewers = {};
-
-   // The joined event is emitted with a single nickname
-   chatter.on ('joined', function (nickname) {
-
-      winston.info ((followers.isFollower (nickname) ? 'Follower ': '') + nickname + ' joined the chat room');
-
-      var now = new Date;
-      if (viewers [nickname]) {
-         viewers [nickname].join_count++;
-         viewers [nickname].last_joined = now;
-      } else {
-         // Not seen this viewer before
-         viewers [nickname] = {
-            first_joined: now,
-            last_joined: now,
-            last_left: null,
-            join_count: 1,
-            last_greeted_at: null,
-            avatar_last_shown_at: null,
-            greeting_timer: null
-         };
-      }
-
-      winston.debug (nickname + " seen " + viewers [nickname].join_count + "time(s), first joined at: " + viewers [nickname].join_count);
-
-      // Set the timer for default 3 seconds that announces new joiners.  The timeout is so that
-      // anyone joining and leaving very quickly doesn't spam the announcement
-      var timeout = config ['greenting-timeout'] || 3000;
-
-      // Greeting timer already set?
-      if (viewers [nickname].greeting_timer) {
-         winston.warn ("Greeting timer already running for: " + nickname);
-         return;
-      }
-
-      var greet = function delayedGreet (name) {
-         return function greetNow () {
-
-            var isFollower = followers.isFollower (name);
-
-            // Clear the saved timer
-            viewers [name].greeting_timer = null;
-
-            var greetDate = new Date;  // don't use now, it'll be 3 seconds behind!
-
-            if (nickname !== config.channel) {
-               if (viewers [name].last_greeted_at) {
-                  winston.info ("Already greeted " + name + " at " + viewers [name].last_greeted_at);
-               } else {
-                  winston.info ("Sending greetings to " + name);
-                  chatter.sendMessage (strings.get (isFollower ? 'chat-welcome-follower' : 'chat-welcome-normal', { 'name': name }));
-                  viewers [name].last_greeted_at = greetDate;
-               }
-            }
-
-            if (!isFollower && viewers [name].avatar_last_shown_at) {
-               winston.info ("Already shown avatar for " + name + " at " + viewers [name].avatar_last_shown_at);
-            } else {
-               var av = new Avatar ();
-               av.requestImage (name, function requestImageCallback (error, image_url) {
-                  winston.info ("Showing greeting avatar for " + name);
-                  server.toClient ('new joiner', {
-                     'nickname': name,
-                     'image_url': image_url,
-                     'message': strings.get ('frontend-welcome', {'name': name}),
-                     'isFollower': isFollower
-                  });
-                  viewers [name].avatar_last_shown_at = new Date;    // new date, since image url request takes some time
-               });
-            }
-         };
-      };
-
-      winston.debug ("Setting greeting timer " + timeout + " for " + nickname);
-      viewers [nickname].greeting_timer = setTimeout (greet (nickname), timeout);
-
-   });
-
-   // The left event is emitted with a single nickname
-   chatter.on ('left', function (nickname) {
-      winston.info (nickname + ' left the chat room');
-         if (viewers [nickname]) {
-            viewers [nickname].last_left = new Date;
-            if (viewers [nickname].greeting_timer) {
-               winston.debug ("Cancelling greeting timer for " + nickname);
-               clearTimeout (viewers [nickname].greeting_timer);
-               viewers [nickname].greeting_timer = null;
-            }
+      function (error) {
+         if (error) {
+            winston.error ("Error terminating plugin file: " + error);
+            process.exit (1);
          }
-      });
-
-   // Someone has rated, send a message to the UI to display it
-   chatter.on ('rating', function (event) {
-      winston.info (event.nickname + ' has given a rating: ' + event.rating);
-      server.toClient ('new rating', {'percent': event.rating});
-   });
+         process.exit (0);
+      }
+   );
 }
 
 //
-// Handle CTRL-C and send the goodbye message to the chat room
+// Handle CTRL-C to quit, although this doesn't get triggered when running under Electron
 //
 process.on ('SIGINT', function () {
     winston.info ("Caught interrupt signal, exiting");
-    if (chatter) {
-       chatter.sendMessage (strings.get ('chat-bot-leaving'));
-    }
-
-    // Save the viewers data as json file, for later inspection
-    var dateString = moment().format('YYYYMMDD_HHmm');
-    var savedViewersFilename = "viewers_" + dateString + ".json";
-    jsonfile.writeFile (__approot + "/saved/" + savedViewersFilename, viewers, function wroteJsonViewersFile () {
-       winston.debug ("Saved viewers to json file: " + savedViewersFilename);
-       // Delay the exit by a few millis to give the message time to be sent
-       setTimeout (function () {
-          process.exit ();
-       }, 200);
-    });
+    quit ();
 });
