@@ -60,9 +60,12 @@ var Chatter = function Chatter () {
          commands [name].init (self, config, strings, bot);
 
          winston.info ('Loaded the ' + name + ' chatter module.');
-         var helpstring = '  !' + commands [name].name + ' ' + commands [name].args;
-         helpstring = _.padEnd (helpstring, 10);
-         helpstring += '- ' + commands [name].help + "\n";
+         var helpstring = '';
+         if (commands [name].help) {
+            helpstring = '  !' + commands [name].name + ' ' + commands [name].args;
+            helpstring = _.padEnd (helpstring, 10);
+            helpstring += '- ' + commands[name].help + "\n";
+         }
 
          helpmessage += helpstring;
       }

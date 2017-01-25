@@ -18,5 +18,6 @@
    "rate-thanks": "Thanks {name}, {owner} really appreciates the feedback.",
    "rate-1-new": "{owner}'s new rating is {pct}%,\n1 viewer has rated so far.",
    "rate-n-new": "{owner}'s new rating is {pct}%,\n{num} viewers has rated so far.",
-   "rate-error": "You need to supply a number between 0 and 100 with the !rate command."
+   "rate-error": "You need to supply a number between 0 and 100 with the !rate command.",
+   "help-hat": "Control the hat"
 }
