@@ -11,6 +11,8 @@ var util = require ('util');
 
 var __approot = require('app-root-path');
 
+var Bottleneck = require('bottleneck');
+
 var EventEmitter = require ('events').EventEmitter;
 
 var xmppbot = require (__approot + '/modules/xmpp.js');
@@ -47,8 +49,19 @@ var Chatter = function Chatter () {
       }
    });
 
+   var limiter = new Bottleneck (1, 1000);
+
+   var sendRateLimitedMessage = function (channel, message) {
+      limiter.submit (function (cb) {
+         bot.message (channel, message);
+         process.nextTick (function () {
+            cb (null);
+         });
+      }, null);
+   };
+
    bot.on( 'command!help', function (channel, text, nickname, stanza) {
-      bot.message (channel, helpmessage);
+      sendRateLimitedMessage (channel, helpmessage);
    });
 
    bot.on ('online', function (data) {
@@ -71,8 +84,8 @@ var Chatter = function Chatter () {
       // When the bot joins the room, issue the greeting message
       if (nickname === username) {
          var greeting = strings.get ('chat-bot-greeting', {'name': config ['chatname']});
-         bot.message (channel, greeting);
-         bot.message (channel, helpmessage);
+         sendRateLimitedMessage (channel, greeting);
+         sendRateLimitedMessage (channel, helpmessage);
       } else {
          // Emit the joined event for all other users
          self.emit ('joined', nickname);
@@ -93,7 +106,7 @@ var Chatter = function Chatter () {
    };
 
    self.sendMessage = function sendMessage (message) {
-      bot.message (channel, message);
+      sendRateLimitedMessage (channel, message);
    };
 };
 

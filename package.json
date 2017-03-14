@@ -30,6 +30,7 @@
   "dependencies": {
     "app-root-path": "^2.0.1",
     "async": "^2.1.2",
+    "bottleneck": "^1.15.1",
     "cheerio": "^0.22.0",
     "electron": "1.4.5",
     "express": "^4.14.0",
