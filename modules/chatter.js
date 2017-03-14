@@ -19,6 +19,25 @@ var xmppbot = require (__approot + '/modules/xmpp.js');
 var config = require (__approot + '/modules/config.js');
 var strings = require (__approot + '/modules/strings.js');
 
+var MockChatter = function MockChatter () {
+   var self = this;
+
+   var username = config.nickname.substring (0, config.nickname.indexOf ('@'));
+   var channel = config.channel;
+
+   self.getChannel = function getChannel () {
+      return channel;
+   };
+
+   self.getUsername = function getUsername () {
+      return username;
+   };
+
+   self.sendMessage = function sendMessage (message) {
+      winston.debug ("Mock Message: " + message);
+   };
+};
+
 var Chatter = function Chatter () {
    var self = this;
 
@@ -111,5 +130,8 @@ var Chatter = function Chatter () {
 };
 
 util.inherits (Chatter, EventEmitter);
+util.inherits (MockChatter, EventEmitter);
 
+//module.exports = exports = new MockChatter ();
 module.exports = exports = new Chatter ();
+

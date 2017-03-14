@@ -78,27 +78,85 @@ app.on('window-all-closed', function() {
 // initialization and is ready to create browser windows.
 app.on ('ready', function () {
 
-   mainWindow = new BrowserWindow ({
-     width: 920,
-     height: 770,
-     'min-width': 500,
-     'min-height': 200,
-     'accept-first-mouse': true,
-     'title-bar-style': 'hidden'
-   });
+   var savedWindowFile = "main_window.json";
+   jsonfile.readFile (__approot + "/saved/" + savedWindowFile, function readJsonWindowFile (error, windowData) {
 
-   mainWindow.loadURL ('http://localhost:3000/main.html');
-   if (argv.debug) {
-      mainWindow.webContents.openDevTools();
-   }
+      var winOpts = {
+         width: 920,
+         height: 770,
+         'min-width': 500,
+         'min-height': 200,
+         'accept-first-mouse': true,
+         'title-bar-style': 'hidden'
+      };
 
-   mainWindow.on ('closed', function() {
-      if (indicatorWindow) {
-         indicatorWindow.close ();
-         indicatorWindow = null;
+      try {
+         if (!error && windowData) {
+            if (windowData.position && windowData.position.x) {
+               winOpts.x = parseInt (windowData.position.x);
+            }
+            if (windowData.position && windowData.position.y) {
+               winOpts.y = parseInt (windowData.position.y);
+            }
+            if (windowData.size && windowData.size.width) {
+               winOpts.width = parseInt (windowData.size.width);
+            }
+            if (windowData.size && windowData.size.height) {
+               winOpts.height = parseInt (windowData.size.height);
+            }
+         }
+      } catch (ex) {
+         winston.error ("Error parsing main_window.json file.", ex);
+         winOpts = {
+            width: 920,
+            height: 770,
+            'min-width': 500,
+            'min-height': 200,
+            'accept-first-mouse': true,
+            'title-bar-style': 'hidden'
+         };
       }
-      mainWindow = null;
+
+      mainWindow = new BrowserWindow (winOpts);
+
+      mainWindow.loadURL ('http://localhost:3000/main.html');
+      if (argv.debug) {
+         mainWindow.webContents.openDevTools();
+      }
+
+      mainWindow.on ('close', function () {
+         var pos = mainWindow.getPosition ();
+         var sz = mainWindow.getSize ();
+         var windowData = {
+            "position": {
+               "x": pos [0],
+               "y": pos [1]
+            },
+            "size": {
+               "width": sz [0],
+               "height": sz [1]
+            }
+         };
+
+         var savedWindowFile = "main_window.json";
+         jsonfile.writeFile (__approot + "/saved/" + savedWindowFile, windowData, function wroteJsonWindowFile (error) {
+            if (error) {
+               winston.error ("Error saving main window data to json file: " + savedWindowFile, error);
+            } else {
+               winston.info("Saved main window data to json file: " + savedWindowFile);
+            }
+         });
+      });
+
+      mainWindow.on ('closed', function() {
+         if (indicatorWindow) {
+            indicatorWindow.close ();
+            indicatorWindow = null;
+         }
+         mainWindow = null;
+      });      
    });
+
 });
 
 app.on ('before-quit', function() {
@@ -170,47 +228,158 @@ server.on ('window', function (_socket, data) {
       indicatorWindow.close ();
    }
 
+   if (data.action == "toggle-borders" && data.name == "indicator" && indicatorWindow) {
+      server.toClient ('toggle-borders', {});
+   }
+
+   if (data.action == "button-move" && data.name == "indicator" && indicatorWindow) {
+      var pos = indicatorWindow.getPosition ();
+      var delta = data.data;
+      if (delta && delta.length == 2) {
+         pos [0] += delta [0];
+         pos [1] += delta [1];
+
+         indicatorWindow.setPosition (pos [0], pos [1]);
+      }
+   }
+   
+   if (data.action == "button-resize" && data.name == "indicator" && indicatorWindow) {
+      var sz = indicatorWindow.getSize ();
+      var delta = data.data;
+      if (delta && delta.length == 2) {
+         sz [0] += delta [0];
+         sz [1] += delta [1];
+
+         indicatorWindow.setSize (sz [0], sz [1]);
+      }
+   }
+
+   if (data.action == "button-save" && data.name == "indicator" && indicatorWindow) {
+      var pos = indicatorWindow.getPosition ();
+      var sz = indicatorWindow.getSize ();
+      var windowData = {
+         "position": {
+            "x": pos [0],
+            "y": pos [1]
+         },
+         "size": {
+            "width": sz [0],
+            "height": sz [1]
+         }
+      };
+
+      var savedWindowFile = "indicator_window.json";
+      jsonfile.writeFile (__approot + "/saved/" + savedWindowFile, windowData, function wroteJsonWindowFile (error) {
+         if (error) {
+            winston.error ("Error saving indicator window data to json file: " + savedWindowFile, error);
+         } else {
+            winston.info("Saved indicator window data to json file: " + savedWindowFile);
+         }
+      });
+   }
+
+   if (data.action == "button-test" && data.name == "indicator" && indicatorWindow) {
+      if (data.data == "rate") {
+         server.toClient ('new rating', {'percent': 50});
+      }
+      if (data.data == "join") {
+         server.toClient ('new joiner', {
+            'nickname': "Tester",
+            'image_url': 'https://www.livecoding.tv/static/img/userdashboard-img.png',
+            'message': strings.get ('frontend-welcome', {'name': 'Tester'}),
+            'isFollower': false
+         });
+      }
+      if (data.data == "follow") {
+         server.toClient ('new follower', {
+            'nickname': "Tester",
+            'image_url': 'https://www.livecoding.tv/static/img/userdashboard-img.png',
+            'message': strings.get ('frontend-latest-follower', {'name': 'Tester'})
+         });
+      }
+   }
+      
    if (data.action == "show" && data.name == "indicator" && !indicatorWindow) {
       winston.verbose ("Request to show indicator window");
 
-      var winOpts = {
-         width: 240, 
-         height: 420, 
-         resizable: true,
-         show: false
-      };
+      var savedWindowFile = "indicator_window.json";
+      jsonfile.readFile (__approot + "/saved/" + savedWindowFile, function readJsonWindowFile (error, windowData) {
+        
+         var winOpts = {
+            width: 240, 
+            height: 420, 
+            resizable: true,
+            show: false
+         };
 
-      if (data.transparent) {
-         winOpts.frame = false;
-         winOpts.transparent = true;
-      } else {
-         winOpts.backgroundColor ="#000000";
-      }
+         try {
+            if (!error && windowData) {
+               if (windowData.position && windowData.position.x) {
+                  winOpts.x = parseInt (windowData.position.x);
+               }
+               if (windowData.position && windowData.position.y) {
+                  winOpts.y = parseInt (windowData.position.y);
+               }
+               if (windowData.size && windowData.size.width) {
+                  winOpts.width = parseInt (windowData.size.width);
+               }
+               if (windowData.size && windowData.size.height) {
+                  winOpts.height = parseInt (windowData.size.height);
+               }
+            }
+         } catch (ex) {
+            winston.error ("Error parsing indicator_window.json file.", ex);
+            winOpts = {
+               width: 240, 
+               height: 420, 
+               resizable: true,
+               show: false
+            };
+         }
+                                                                     
+         if (data.transparent) {
+            winOpts.frame = false;
+            winOpts.transparent = true;
+         } else {
+            winOpts.backgroundColor ="#000000";
+         }
 
-      // Create the browser window.
-      indicatorWindow = new BrowserWindow (winOpts);
+         // Create the browser window.
+         indicatorWindow = new BrowserWindow (winOpts);
 
-      // and load the index.html of the app.
-      indicatorWindow.loadURL('http://localhost:3000/indicator.html');
-      //indicatorWindow.webContents.openDevTools ();
+         // and load the index.html of the app.
+         indicatorWindow.loadURL('http://localhost:3000/indicator.html');
+         //indicatorWindow.webContents.openDevTools ();
 
-      indicatorWindow.on ('ready-to-show', function () {
-         indicatorWindow.show ();
-         winston.verbose ("Indicator window shown");
-         server.toClient ("window", {"name": "indicator", "event": "show"}, _socket);
-      });
+         indicatorWindow.on ('ready-to-show', function () {
+            indicatorWindow.show ();
+            winston.verbose ("Indicator window shown");
+            server.toClient ("window", {"name": "indicator", "event": "show"}, _socket);
+         });
 
-      // Emitted when the window is closed.
-      indicatorWindow.on ('closed', function () {
-          // Dereference the window object, usually you would store windows
-          // in an array if your app supports multi windows, this is the time
-          // when you should delete the corresponding element.
+         // Emitted when the window is closed.
+         indicatorWindow.on ('closed', function () {
+             // Dereference the window object, usually you would store windows
+             // in an array if your app supports multi windows, this is the time
+             // when you should delete the corresponding element.
 
-          winston.verbose ("Indicator window closed");
+             winston.verbose ("Indicator window closed");
 
-          server.toClient("window", { "name": "indicator", "event": "close" }, _socket);
+             server.toClient("window", { "name": "indicator", "event": "close" }, _socket);
 
-          indicatorWindow = null;
+             indicatorWindow = null;
+         });
+
+         indicatorWindow.on ('move', function () {
+            var pos = indicatorWindow.getPosition ();
+            server.toClient ("window", {"name": "indicator", "event": "move", "data": pos}, _socket);
+         });
+
+         indicatorWindow.on ('resize', function () {
+            var sz = indicatorWindow.getSize ();
+            server.toClient ("window", {"name": "indicator", "event": "resize", "data": sz}, _socket);
+         });
+
       });
    }
 });

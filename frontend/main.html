@@ -52,6 +52,29 @@
                   <label>
                     <input type="checkbox" id="chk-transparent"> Transparent&nbsp;/&nbsp;Frameless
                   </label>
+                  <br/>
+                  <button class="btn btn-large btn-default" id="btn-show-toggle-border">Toggle Border</button>
+                  <br/>
+                  Position:&nbsp;<span id="indicator-window-position"></span>&nbsp;Size:&nbsp;<span id="indicator-window-size"></span>
+                  <br/>
+                  <button class="btn btn-small btn-default" id="btn-move-window-left">Left</button>
+                  <button class="btn btn-small btn-default" id="btn-move-window-up">Up</button>
+                  <button class="btn btn-small btn-default" id="btn-move-window-down">Down</button>
+                  <button class="btn btn-small btn-default" id="btn-move-window-right">Right</button>
+                  <br/>
+                  <button class="btn btn-small btn-default" id="btn-resize-window-grow-x">Width + 1</button>
+                  <button class="btn btn-small btn-default" id="btn-resize-window-shrink-x">Width - 1</button>
+                  <button class="btn btn-small btn-default" id="btn-resize-window-grow-y">Height + 1</button>
+                  <button class="btn btn-small btn-default" id="btn-resize-window-shrink-y">Height - 1</button>
+                  <br/>
+                  <button class="btn btn-large btn-default" id="btn-save-indicator-window">Save Window</button>
+                  <br/>
+                  <button class="btn btn-large btn-default" id="btn-test-rate">Test Rating</button>
+                  <br/>
+                  <button class="btn btn-large btn-default" id="btn-test-join">Test New Joiner</button>
+                  <br/>
+                  <button class="btn btn-large btn-default" id="btn-test-follow">Test New Follower</button>
+                  <br/>
               </div>
           </div>
           <div class="pane hidden" id="pane-config">
@@ -146,14 +169,68 @@
                   indicatorWindowVisible = false;
                   $('#btn-show-indicator-window').text ('Show Indicator Window');
                }
+
+               if (event.name == 'indicator' && event.event == 'move') {
+                  $('#indicator-window-position').html (JSON.stringify (event.data));
+               }
+
+               if (event.name == 'indicator' && event.event == 'resize') {
+                  $('#indicator-window-size').html (JSON.stringify (event.data));
+               }
+
             });
+
+         $('#btn-move-window-left').click (function () {
+            socket.emit('window', { 'action': 'button-move', 'name': 'indicator', 'data':[-1,0] });
+         });
+         $('#btn-move-window-up').click (function () {
+            socket.emit('window', { 'action': 'button-move', 'name': 'indicator', 'data':[0,-1] });
+         });
+         $('#btn-move-window-down').click (function () {
+            socket.emit('window', { 'action': 'button-move', 'name': 'indicator', 'data':[0,1] });
+         });
+         $('#btn-move-window-right').click (function () {
+            socket.emit('window', { 'action': 'button-move', 'name': 'indicator', 'data':[1,0] });
+         });
+
+         $('#btn-resize-window-grow-x').click (function () {
+            socket.emit('window', { 'action': 'button-resize', 'name': 'indicator', 'data':[1,0] });
+         });
+         $('#btn-resize-window-shrink-x').click (function () {
+            socket.emit('window', { 'action': 'button-resize', 'name': 'indicator', 'data':[-1,0] });
+         });
+         $('#btn-resize-window-grow-y').click (function () {
+            socket.emit('window', { 'action': 'button-resize', 'name': 'indicator', 'data':[0,1] });
+         });
+         $('#btn-resize-window-shrink-y').click (function () {
+            socket.emit('window', { 'action': 'button-resize', 'name': 'indicator', 'data':[0,-1] });
+         });
+
+         $('#btn-save-indicator-window').click (function () {
+            socket.emit('window', { 'action': 'button-save', 'name': 'indicator' });
+         });
+
+         $('#btn-test-rate').click (function () {
+            socket.emit('window', { 'action': 'button-test', 'name': 'indicator', 'data': 'rate' });
+         });
+         $('#btn-test-join').click (function () {
+            socket.emit('window', { 'action': 'button-test', 'name': 'indicator', 'data': 'join' });
+         });
+         $('#btn-test-follow').click (function () {
+            socket.emit('window', { 'action': 'button-test', 'name': 'indicator', 'data': 'follow' });
+         });
+
 
          $('#btn-show-indicator-window').click (function () {
             if (indicatorWindowVisible) {
-               socket.emit('window', { 'action': 'close', 'name': 'indicator' });               
+               socket.emit('window', { 'action': 'close', 'name': 'indicator' });
             } else {
                socket.emit('window', { 'action': 'show', 'name': 'indicator', 'transparent': $('#chk-transparent').is(":checked") });
             }
+         });
+
+         $('#btn-show-toggle-border').click (function () {
+            socket.emit('window', {'action': 'toggle-borders', 'name': 'indicator' });
          });
       }
    );

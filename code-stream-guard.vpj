@@ -87,9 +87,27 @@
             Name="frontend"
             Filters=""
             GUID="{090B0D61-78D3-4C2F-B595-ED133DBD3B28}">
-            <F N="frontend/js/fireworks.js"/>
-            <F N="frontend/css/frontend.css"/>
-            <F N="frontend/js/winstate.js"/>
+            <Folder
+                Name="html"
+                Filters=""
+                GUID="{6D5836F0-DD4E-4280-990D-AC85CD522FF7}">
+                <F N="frontend/indicator.html"/>
+                <F N="frontend/main.html"/>
+            </Folder>
+            <Folder
+                Name="js"
+                Filters=""
+                GUID="{17B9EC8E-A595-4E25-BA47-4CA10DC648DC}">
+                <F N="frontend/js/fireworks.js"/>
+                <F N="frontend/js/winstate.js"/>
+            </Folder>
+            <Folder
+                Name="css"
+                Filters=""
+                GUID="{01D3F33D-A378-462C-B66E-CFA795787D83}">
+                <F N="frontend/css/frontend.css"/>
+                <F N="frontend/css/main.css"/>
+            </Folder>
         </Folder>
         <Folder
             Name="commands"
@@ -97,6 +115,14 @@
             GUID="{C7AE7985-8464-4B35-B679-C5B68DBC3337}">
             <F N="commands/cloc.js"/>
             <F N="commands/rate.js"/>
+        </Folder>
+        <Folder
+            Name="plugins"
+            Filters=""
+            GUID="{3AC0D85A-B5F6-4ABB-99EB-3B73EE2078AD}">
+            <F N="plugins/internal/announce-followers.js"/>
+            <F N="plugins/internal/announce-ratings.js"/>
+            <F N="plugins/internal/announce-viewers.js"/>
         </Folder>
     </Files>
 </Project>

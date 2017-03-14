@@ -23,18 +23,18 @@
     <title>Code Stream Guard Display</title>
   </head>
   <body>
-    <div class="fireworks">
+    <div class="fireworks area">
        <canvas id="fireworksCanvas"></canvas>
     </div>
 
-    <div class="follower">
-      <div class="follower-area">
+    <div class="follower area">
+      <div class="follower-area area">
         <b><span id="follower-text"></span></b>
         <img id="follower-image" />
       </div>
     </div>
 
-    <div class="rating">
+    <div class="rating area">
        <div class="GaugeMeter" id="RateOMeter" data-percent="0" data-append="%"
            data-size="200" data-theme="Red-Gold-Green" data-back="RGBa(0,0,0,0)"
            data-animate_gauge_colors="1" data-animate_text_colors="1" data-width="15"
@@ -53,10 +53,30 @@
         $ (".GaugeMeter").gaugeMeter ().hide ();
         $ (".follower-area").hide ();
 
+        var border = false;
+
         //
         // Socket.io to communicate with the backend Express instance
         //
         var socket = io ();
+
+        //
+        // Draw a border around the main window body, to indicate where it is
+        //
+        socket.on ('toggle-borders', function (event) {
+           (function () {
+              border = !border;
+              var style = border ? {
+                 "border-color": "#FF00FF",
+                 "border-width":"2px", 
+                 "border-style":"dashed"
+              } : {
+                 "border": "none"
+              };
+              //$("body").css (style);
+              $(".area").css (style);
+           }) ();
+        });
 
         //
         // When we get a new rating, trigger some fireworks and show the
