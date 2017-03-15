@@ -98,6 +98,13 @@ var Chatter = function Chatter () {
 
    bot.on( 'msg', function (nickname, _channel, message, stanza) {
       winston.debug (nickname + ' said "' + message + '" in ' + _channel );
+      if (nickname !== username && message && message.charAt (0) != '!') {
+         self.emit ('chat', {
+            nickname: nickname,
+            message: message,
+            channel: _channel
+         });
+      }
    });
 
    bot.on( 'join', function (_channel, nickname, stanza) {

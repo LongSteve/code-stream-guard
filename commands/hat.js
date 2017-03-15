@@ -66,6 +66,22 @@ module.exports = {
        );
    },
 
+   chatter: function () {
+       var self = this;
+       self.particle.callFunction ({
+          'deviceId': self.particle_device_id,
+          'auth': self.particle_access_token,
+          'name': 'chatter',
+          'argument': '5'}).then (
+          function (data) {
+             winston.debug ("Success calling chatter function");
+          },
+          function (error) {
+             winston.error ("Failure calling chatter function: ", error);
+          }
+       );
+   },
+
    cylon: function (c) {
        var self = this;
        self.particle.callFunction ({
@@ -93,6 +109,11 @@ module.exports = {
       // Pulse when someone joins
       chatter.on ('joined', function (nickname) {
          self.pulse ();
+      });
+
+      // Chatter when someone types a message
+      chatter.on ('chat', function (data) {
+         self.chatter ();
       });
 
       self.help = strings.get ('help-hat');
