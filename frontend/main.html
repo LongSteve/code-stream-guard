@@ -5,6 +5,8 @@
 
     <!-- Stylesheets -->
     <link rel="stylesheet" href="css/photon.min.css"></link>
+    <link rel="stylesheet" href="css/bootstrap.min.css"></link>
+    <link rel="stylesheet" href="css/bootstrap-toggle.min.css"></link>
     <link rel="stylesheet" href="css/main.css"></link>
 
     <!-- Fix to allow Electron to load jQuery  -->
@@ -16,8 +18,12 @@
     <!-- jQuery obviously -->
     <script src="lib/jquery-3.1.1.min.js"></script>
 
+    <!-- Bootstrap for UI -->
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/bootstrap-toggle.min.js"></script>
+
     <!-- socket.io.js is served by the Express backend with a specific route -->
-    <script src="socket.io.js"></script>
+    <script src="socket.io.min.js"></script>
 
     <!-- Post jQuery/Electron fix -->
     <script>if (window.module) module = window.module;</script>
@@ -47,10 +53,9 @@
           </div>
           <div class="pane center-container" id="pane-window">
               <div>
-                  <button class="btn btn-large btn-default" id="btn-show-indicator-window">Show Indicator Window</button>
-                  <br/>
-                  <label>
-                    <input type="checkbox" id="chk-transparent"> Transparent&nbsp;/&nbsp;Frameless
+                  <button class="btn btn-success" id="btn-show-indicator-window">Show Indicator Window</button>
+                  <label class="checkbox-inline">
+                    <input type="checkbox" checked data-toggle="toggle" data-on="Transparent" data-off="Normal Frame" id="chk-transparent" data-onstyle="info" data-offstyle="warning">
                   </label>
                   <br/>
                   <button class="btn btn-large btn-default" id="btn-show-toggle-border">Toggle Border</button>

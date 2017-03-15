@@ -30,6 +30,8 @@
   "dependencies": {
     "app-root-path": "^2.0.1",
     "async": "^2.1.2",
+    "bootstrap": "^3.3.7",
+    "bootstrap-toggle": "^2.2.2",
     "bottleneck": "^1.15.1",
     "cheerio": "^0.22.0",
     "electron": "^1.6.0",
@@ -41,8 +43,8 @@
     "moment": "^2.16.0",
     "node-schedule": "^1.1.1",
     "node-xmpp-client": "^3.0.2",
-    "readdirp": "^2.1.0",
     "particle-api-js": "^6.4.2",
+    "readdirp": "^2.1.0",
     "request": "^2.75.0",
     "socket.io": "^1.7.0",
     "winston": "^2.2.0"

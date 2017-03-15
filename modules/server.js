@@ -26,14 +26,10 @@ var Server = function Server () {
    var io = require ('socket.io') (http);
 
    app.use (express.static (__approot + '/frontend/'));
-
-   //app.get ('/', function (req, res) {
-   //  res.sendFile (__dirname + '/frontend/index.html');
-   //});
-
-   app.get ('/socket.io.js', function (req, res) {
-     res.sendFile (__approot + '/node_modules/socket.io-client/dist/socket.io.min.js');
-   });
+   app.use (express.static (__approot + '/node_modules/bootstrap/dist/'));
+   app.use (express.static (__approot + '/node_modules/bootstrap-toggle/'));
+   app.use (express.static (__approot + '/node_modules/fontawesome/dist/'));
+   app.use (express.static (__approot + '/node_modules/socket.io-client/dist/'));
 
    http.listen (3000, function () {
      winston.info ('listening on *:3000');

@@ -1,129 +1,129 @@
 <!DOCTYPE Project SYSTEM "http://www.slickedit.com/dtd/vse/10.0/vpj.dtd">
 <Project
-   Version="10.0"
-   VendorName="SlickEdit"
-   TemplateName="(Other)"
-   WorkingDir="."
-   VCSProject="Git:">
-   <Config
-      Name="Release"
-      OutputFile=""
-      CompilerConfigName="">
-      <Menu>
-         <Target
-            Name="Compile"
-            MenuCaption="&amp;Compile"
-            CaptureOutputWith="ProcessBuffer"
-            SaveOption="SaveCurrent"
-            RunFromDir="%rw">
-            <Exec/>
-         </Target>
-         <Target
-            Name="Build"
-            MenuCaption="&amp;Build"
-            CaptureOutputWith="ProcessBuffer"
-            SaveOption="SaveWorkspaceFiles"
-            RunFromDir="%rw">
-            <Exec/>
-         </Target>
-         <Target
-            Name="Rebuild"
-            MenuCaption="&amp;Rebuild"
-            CaptureOutputWith="ProcessBuffer"
-            SaveOption="SaveWorkspaceFiles"
-            RunFromDir="%rw">
-            <Exec/>
-         </Target>
-         <Target
-            Name="Debug"
-            MenuCaption="&amp;Debug"
-            SaveOption="SaveAll"
-            RunFromDir="%rw"
-            CaptureOutputWith="ProcessBuffer"
-            ClearProcessBuffer="1">
-            <Exec CmdLine="./run --debug"/>
-         </Target>
-         <Target
-            Name="Execute"
-            MenuCaption="E&amp;xecute"
-            SaveOption="SaveAll"
-            RunFromDir="%rw"
-            CaptureOutputWith="ProcessBuffer"
-            ClearProcessBuffer="1">
-            <Exec CmdLine="./run"/>
-         </Target>
-      </Menu>
-   </Config>
-   <Files>
-      <Folder
-         Name="main"
-         Filters=""
-         GUID="{88188ED9-43E3-47FB-BDE3-30B7EB9F440B}">
-         <F N="app.js"/>
-         <F N="package.json"/>
-         <F N="README.md"/>
-         <F N="run"/>
-      </Folder>
-      <Folder
-         Name="config"
-         Filters=""
-         GUID="{A3913A08-3E10-4AA3-B6F6-1B41FB5C76B0}">
-         <F N="config.json"/>
-         <F N="strings.json"/>
-      </Folder>
-      <Folder
-         Name="modules"
-         Filters=""
-         GUID="{85724FF2-DD1F-42A0-8784-E217450D6F39}">
-         <F N="modules/avatar.js"/>
-         <F N="modules/chatter.js"/>
-         <F N="modules/config.js"/>
-         <F N="modules/followers.js"/>
-         <F N="modules/server.js"/>
-         <F N="modules/strings.js"/>
-         <F N="modules/xmpp.js"/>
-      </Folder>
-      <Folder
-         Name="frontend"
-         Filters=""
-         GUID="{090B0D61-78D3-4C2F-B595-ED133DBD3B28}">
-         <Folder
-            Name="html"
+    Version="10.0"
+    VendorName="SlickEdit"
+    TemplateName="(Other)"
+    WorkingDir="."
+    VCSProject="Git:">
+    <Config
+        Name="Release"
+        OutputFile=""
+        CompilerConfigName="">
+        <Menu>
+            <Target
+                Name="Compile"
+                MenuCaption="&amp;Compile"
+                CaptureOutputWith="ProcessBuffer"
+                SaveOption="SaveCurrent"
+                RunFromDir="%rw">
+                <Exec/>
+            </Target>
+            <Target
+                Name="Build"
+                MenuCaption="&amp;Build"
+                CaptureOutputWith="ProcessBuffer"
+                SaveOption="SaveWorkspaceFiles"
+                RunFromDir="%rw">
+                <Exec/>
+            </Target>
+            <Target
+                Name="Rebuild"
+                MenuCaption="&amp;Rebuild"
+                CaptureOutputWith="ProcessBuffer"
+                SaveOption="SaveWorkspaceFiles"
+                RunFromDir="%rw">
+                <Exec/>
+            </Target>
+            <Target
+                Name="Debug"
+                MenuCaption="&amp;Debug"
+                SaveOption="SaveAll"
+                RunFromDir="%rw"
+                CaptureOutputWith="ProcessBuffer"
+                ClearProcessBuffer="1">
+                <Exec CmdLine="./run --debug"/>
+            </Target>
+            <Target
+                Name="Execute"
+                MenuCaption="E&amp;xecute"
+                SaveOption="SaveAll"
+                RunFromDir="%rw"
+                CaptureOutputWith="ProcessBuffer"
+                ClearProcessBuffer="1">
+                <Exec CmdLine="./run"/>
+            </Target>
+        </Menu>
+    </Config>
+    <Files>
+        <Folder
+            Name="main"
             Filters=""
-            GUID="{6D5836F0-DD4E-4280-990D-AC85CD522FF7}">
-            <F N="frontend/indicator.html"/>
-            <F N="frontend/main.html"/>
-         </Folder>
-         <Folder
-            Name="js"
+            GUID="{88188ED9-43E3-47FB-BDE3-30B7EB9F440B}">
+            <F N="app.js"/>
+            <F N="package.json"/>
+            <F N="README.md"/>
+            <F N="run"/>
+        </Folder>
+        <Folder
+            Name="config"
             Filters=""
-            GUID="{17B9EC8E-A595-4E25-BA47-4CA10DC648DC}">
-            <F N="frontend/js/fireworks.js"/>
-            <F N="frontend/js/winstate.js"/>
-         </Folder>
-         <Folder
-            Name="css"
+            GUID="{A3913A08-3E10-4AA3-B6F6-1B41FB5C76B0}">
+            <F N="config.json"/>
+            <F N="strings.json"/>
+        </Folder>
+        <Folder
+            Name="modules"
             Filters=""
-            GUID="{01D3F33D-A378-462C-B66E-CFA795787D83}">
-            <F N="frontend/css/frontend.css"/>
-            <F N="frontend/css/main.css"/>
-         </Folder>
-      </Folder>
-      <Folder
-         Name="commands"
-         Filters=""
-         GUID="{C7AE7985-8464-4B35-B679-C5B68DBC3337}">
-         <F N="commands/cloc.js"/>
-         <F N="commands/hat.js"/>
-         <F N="commands/rate.js"/>
-      </Folder>
-      <Folder
-         Name="plugins"
-         Filters=""
-         GUID="{3AC0D85A-B5F6-4ABB-99EB-3B73EE2078AD}">
-         <F N="plugins/internal/announce-followers.js"/>
-         <F N="plugins/internal/announce-ratings.js"/>
-         <F N="plugins/internal/announce-viewers.js"/>
-      </Folder>
-   </Files>
+            GUID="{85724FF2-DD1F-42A0-8784-E217450D6F39}">
+            <F N="modules/avatar.js"/>
+            <F N="modules/chatter.js"/>
+            <F N="modules/config.js"/>
+            <F N="modules/followers.js"/>
+            <F N="modules/server.js"/>
+            <F N="modules/strings.js"/>
+            <F N="modules/xmpp.js"/>
+        </Folder>
+        <Folder
+            Name="frontend"
+            Filters=""
+            GUID="{090B0D61-78D3-4C2F-B595-ED133DBD3B28}">
+            <Folder
+                Name="html"
+                Filters=""
+                GUID="{6D5836F0-DD4E-4280-990D-AC85CD522FF7}">
+                <F N="frontend/indicator.html"/>
+                <F N="frontend/main.html"/>
+            </Folder>
+            <Folder
+                Name="js"
+                Filters=""
+                GUID="{17B9EC8E-A595-4E25-BA47-4CA10DC648DC}">
+                <F N="frontend/js/fireworks.js"/>
+                <F N="frontend/js/winstate.js"/>
+            </Folder>
+            <Folder
+                Name="css"
+                Filters=""
+                GUID="{01D3F33D-A378-462C-B66E-CFA795787D83}">
+                <F N="frontend/css/indicator.css"/>
+                <F N="frontend/css/main.css"/>
+            </Folder>
+        </Folder>
+        <Folder
+            Name="commands"
+            Filters=""
+            GUID="{C7AE7985-8464-4B35-B679-C5B68DBC3337}">
+            <F N="commands/cloc.js"/>
+            <F N="commands/hat.js"/>
+            <F N="commands/rate.js"/>
+        </Folder>
+        <Folder
+            Name="plugins"
+            Filters=""
+            GUID="{3AC0D85A-B5F6-4ABB-99EB-3B73EE2078AD}">
+            <F N="plugins/internal/announce-followers.js"/>
+            <F N="plugins/internal/announce-ratings.js"/>
+            <F N="plugins/internal/announce-viewers.js"/>
+        </Folder>
+    </Files>
 </Project>

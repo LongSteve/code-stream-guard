@@ -56,8 +56,8 @@ winston.remove(winston.transports.Console);
 //
 // Electron Front End
 //
-var app = require('electron').app;  // Module to control application life.
-var BrowserWindow = require('electron').BrowserWindow;  // Module to create native browser window.
+var app = require('electron').app;                       // Module to control application life.
+var BrowserWindow = require('electron').BrowserWindow;   // Module to create native browser window.
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -81,11 +81,17 @@ app.on ('ready', function () {
    var savedWindowFile = "main_window.json";
    jsonfile.readFile (__approot + "/saved/" + savedWindowFile, function readJsonWindowFile (error, windowData) {
 
+      var defaultWindowWidth = 680;
+      var defaultWindowHeight = 420;
+
+      var windowMinWidth = 680;
+      var windowMinHeight = 420;
+
+      var usingSavedSettings = false;
+
       var winOpts = {
-         width: 920,
-         height: 770,
-         'min-width': 500,
-         'min-height': 200,
+         'min-width': windowMinWidth,
+         'min-height': windowMinHeight,
          'accept-first-mouse': true,
          'title-bar-style': 'hidden'
       };
@@ -104,18 +110,40 @@ app.on ('ready', function () {
             if (windowData.size && windowData.size.height) {
                winOpts.height = parseInt (windowData.size.height);
             }
+
+            usingSavedSettings = true;
          }
       } catch (ex) {
          winston.error ("Error parsing main_window.json file.", ex);
-         winOpts = {
-            width: 920,
-            height: 770,
-            'min-width': 500,
-            'min-height': 200,
-            'accept-first-mouse': true,
-            'title-bar-style': 'hidden'
-         };
+         usingSavedSettings = false;
       }
+
+      if (!usingSavedSettings) {
+         winOpts.width = defaultWindowWidth;
+         winOpts.height = defaultWindowHeight;
+
+         // Determine the center of the primary monitor to display on
+         var screen = require('electron').screen;  // Note, can only do this here after the app is ready
+         var displays = screen.getAllDisplays ();
+         // Default to the first screen
+         var display = displays [0];
+         winOpts.x = display.workArea.x + (display.workArea.width - defaultWindowWidth) / 2;
+         winOpts.y = display.workArea.y + (display.workArea.height - defaultWindowHeight) / 2;
+         // Now search for one with bounds.x and bounds.y at 0,0 for a primary display
+         if (displays.length > 0) {
+            for (var i in displays) {
+               // Pick the display with the bounds.x and bounds.y at 0,0 for the primary monitor
+               display = displays [i];
+               if (display.bounds.x === 0 && display.bounds.y === 0) {
+                  winOpts.x = display.workArea.x + (display.workArea.width - defaultWindowWidth) / 2;
+                  winOpts.y = display.workArea.y + (display.workArea.height - defaultWindowHeight) / 2;
+                  break;
+               }
+            }
+         }
+      }
+      
+      winston.info ("Main window location and size: " + winOpts.x + "," + winOpts.y + " " + winOpts.width + "x" + winOpts.height);
 
       mainWindow = new BrowserWindow (winOpts);
 
@@ -305,9 +333,11 @@ server.on ('window', function (_socket, data) {
       var savedWindowFile = "indicator_window.json";
       jsonfile.readFile (__approot + "/saved/" + savedWindowFile, function readJsonWindowFile (error, windowData) {
         
+         var defaultIndicatorWindowWidth = 240;
+         var defaultIndicatorWindowHeight = 420;
+         var usingSavedSettings = false;
+
          var winOpts = {
-            width: 240, 
-            height: 420, 
             resizable: true,
             show: false
          };
@@ -326,23 +356,31 @@ server.on ('window', function (_socket, data) {
                if (windowData.size && windowData.size.height) {
                   winOpts.height = parseInt (windowData.size.height);
                }
+               usingSavedSettings = true;
             }
          } catch (ex) {
             winston.error ("Error parsing indicator_window.json file.", ex);
-            winOpts = {
-               width: 240, 
-               height: 420, 
-               resizable: true,
-               show: false
-            };
+            usingSavedSettings = false;
          }
                                                                      
          if (data.transparent) {
             winOpts.frame = false;
             winOpts.transparent = true;
          } else {
-            winOpts.backgroundColor ="#000000";
+            winOpts.backgroundColor ="#FFFFFF";
          }
+
+         if (!usingSavedSettings) {
+            winOpts.width = defaultIndicatorWindowWidth;
+            winOpts.height = defaultIndicatorWindowHeight;
+
+            var mainWindowPos = mainWindow.getPosition ();
+            var mainWindowSize = mainWindow.getSize ();
+            winOpts.x = mainWindowPos [0] + mainWindowSize [0];
+            winOpts.y = mainWindowPos [1] + mainWindowSize [1] - winOpts.height;
+         }
+
+         winston.info ("Opening indicator window, location and size: " + winOpts.x + "," + winOpts.y + " " + winOpts.width + "x" + winOpts.height);
 
          // Create the browser window.
          indicatorWindow = new BrowserWindow (winOpts);
