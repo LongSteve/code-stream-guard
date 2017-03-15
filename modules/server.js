@@ -32,7 +32,7 @@ var Server = function Server () {
    //});
 
    app.get ('/socket.io.js', function (req, res) {
-     res.sendFile (__approot + '/node_modules/socket.io-client/socket.io.js');
+     res.sendFile (__approot + '/node_modules/socket.io-client/dist/socket.io.min.js');
    });
 
    http.listen (3000, function () {

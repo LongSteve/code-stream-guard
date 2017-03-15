@@ -4,12 +4,12 @@
 
 var Particle = require('particle-api-js');
 
-var config = require ('../config.js');
-
 var winston = require ('winston');
 
-var followers = require ('../followers.js');
-var chatter = require ('../chatter.js');
+var __approot = require('app-root-path');
+
+var followers = require ('../modules/followers.js');
+var chatter = require ('../modules/chatter.js');
 
 module.exports = {
    name: 'hat',
