@@ -13,7 +13,7 @@ var chatter = require ('../modules/chatter.js');
 
 module.exports = {
    name: 'hat',
-   args: '[color | cylon | rainbow | pulse | clear] ',
+   args: 'ARG ',
 
    particle_access_token: null,
    particle_device_id: null,

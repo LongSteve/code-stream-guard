@@ -62,8 +62,9 @@ var Chatter = function Chatter () {
          winston.info ('Loaded the ' + name + ' chatter module.');
          var helpstring = '';
          if (commands [name].help) {
-            helpstring = '  !' + commands [name].name + ' ' + commands [name].args;
-            helpstring = _.padEnd (helpstring, 10);
+            helpstring = ' !' + commands [name].name;
+            helpstring += (commands [name].args.length > 0) ? ' ' + commands [name].args : '';
+            helpstring = _.padEnd (helpstring, 9);
             helpstring += '- ' + commands[name].help + "\n";
          }
 
