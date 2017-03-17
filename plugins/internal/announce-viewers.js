@@ -122,18 +122,20 @@ var AnnounceViewersPlugin = function AnnounceViewersPlugin () {
       winston.verbose ('AnnounceViewersPlugin: term');
 
       // Save the viewers data as json file, for later inspection
-      var dateString = moment().format('YYYYMMDD_HHmm');
-      var savedViewersFilename = "viewers_" + dateString + ".json";
-      jsonfile.writeFile (__approot + "/saved/" + savedViewersFilename, viewers, function wroteJsonViewersFile (error) {
-         if (error) {
-            winston.error ("Error saving viewers to json file: " + savedViewersFilename, error);
-         } else {
-            winston.info("Saved viewers to json file: " + savedViewersFilename);
-         }
-         if (callback) {
-            callback (error, null);
-         }
-      });
+      if (Object.keys (viewers).length > 0) {
+         var dateString = moment().format('YYYYMMDD_HHmm');
+         var savedViewersFilename = "viewers_" + dateString + ".json";
+         jsonfile.writeFile (__approot + "/saved/" + savedViewersFilename, viewers, function wroteJsonViewersFile (error) {
+            if (error) {
+               winston.error ("Error saving viewers to json file: " + savedViewersFilename, error);
+            } else {
+               winston.info("Saved viewers to json file: " + savedViewersFilename);
+            }
+            if (callback) {
+               callback (error, null);
+            }
+         });
+      }
    };
 
 };

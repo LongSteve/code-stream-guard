@@ -41,7 +41,7 @@
           <div class="pane pane-sm sidebar">
             <nav class="nav-group">
               <h5 class="nav-group-title">Functions</h5>
-              <span class="nav-group-item" id="nav-window">
+              <span class="nav-group-item active" id="nav-window">
                 <span class="icon icon-window"></span>
                 Windows
               </span>
@@ -89,7 +89,7 @@
                   </div>
               </div>
           </div>
-          <div class="pane hidden" id="pane-config">
+          <div class="pane" id="pane-config" style="display:none;">
             <form class="form-config">
               <div class="form-group">              
                 <div class="checkbox">
@@ -155,13 +155,22 @@
          // Click handlers for the sidebar
          //
          $("#nav-window").click (function () {
+           $(this).addClass ("active");
+           $("#nav-config").removeClass ("active");
            $("#pane-config").hide ();
            $("#pane-window").show ();     
          });
 
          $("#nav-config").click (function () {
-           $("#pane-window").hide ();
-           $("#pane-config").show ();     
+            $(this).addClass ("active");
+            $("#nav-window").removeClass ("active");
+            $("#pane-window").hide ();
+            $("#pane-config").show ();
+         });
+
+         $(".nav .nav-group-item").on("click", function(){
+            $(".nav").find(".active").removeClass("active");
+            $(this).parent().addClass("active");
          });
 
          //
