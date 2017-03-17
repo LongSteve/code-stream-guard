@@ -58,7 +58,7 @@
                     <input type="checkbox" checked data-toggle="toggle" data-on="Transparent" data-off="Normal Frame" id="chk-transparent" data-onstyle="info" data-offstyle="warning">
                   </label>
                   <br/>
-                  <button class="btn btn-large btn-default" id="btn-show-toggle-border">Toggle Border</button>
+                  <button class="btn btn-large btn-default" id="btn-show-indicators">Toggle Borders</button>
                   <br/>
                   Position:&nbsp;<span id="indicator-window-position"></span>&nbsp;Size:&nbsp;<span id="indicator-window-size"></span>
                   <br/>
@@ -234,8 +234,8 @@
             }
          });
 
-         $('#btn-show-toggle-border').click (function () {
-            socket.emit('window', {'action': 'toggle-borders', 'name': 'indicator' });
+         $('#btn-show-indicators').click (function () {
+            socket.emit('window', {'action': 'indicate', 'name': 'indicator' });
          });
       }
    );

@@ -23,6 +23,8 @@
     <title>Code Stream Guard Display</title>
   </head>
   <body>
+    <div class="fadesInAndOut"></div>
+
     <div class="fireworks area">
        <canvas id="fireworksCanvas"></canvas>
     </div>
@@ -53,8 +55,6 @@
         $ (".GaugeMeter").gaugeMeter ().hide ();
         $ (".follower-area").hide ();
 
-        var border = false;
-
         //
         // Socket.io to communicate with the backend Express instance
         //
@@ -63,18 +63,13 @@
         //
         // Draw a border around the main window body, to indicate where it is
         //
-        socket.on ('toggle-borders', function (event) {
+        socket.on ('indicate', function (event) {
            (function () {
-              border = !border;
-              var style = border ? {
-                 "border-color": "#FF00FF",
-                 "border-width":"2px", 
-                 "border-style":"dashed"
-              } : {
-                 "border": "none"
-              };
-              //$("body").css (style);
-              $(".area").css (style);
+              if ($(".area").hasClass ("indicate")) {
+                 $(".area").removeClass ("indicate");
+              } else {
+                 $(".area").addClass ("indicate");
+              }
            }) ();
         });
 

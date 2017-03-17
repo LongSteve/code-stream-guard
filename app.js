@@ -256,8 +256,8 @@ server.on ('window', function (_socket, data) {
       indicatorWindow.close ();
    }
 
-   if (data.action == "toggle-borders" && data.name == "indicator" && indicatorWindow) {
-      server.toClient ('toggle-borders', {});
+   if (data.action == "indicate" && data.name == "indicator" && indicatorWindow) {
+      server.toClient ('indicate', {});
    }
 
    if (data.action == "button-move" && data.name == "indicator" && indicatorWindow) {
