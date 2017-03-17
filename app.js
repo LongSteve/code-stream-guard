@@ -81,11 +81,11 @@ app.on ('ready', function () {
    var savedWindowFile = "main_window.json";
    jsonfile.readFile (__approot + "/saved/" + savedWindowFile, function readJsonWindowFile (error, windowData) {
 
-      var defaultWindowWidth = 680;
-      var defaultWindowHeight = 420;
+      var defaultWindowWidth = 600;
+      var defaultWindowHeight = 400;
 
-      var windowMinWidth = 680;
-      var windowMinHeight = 420;
+      var windowMinWidth = 560;
+      var windowMinHeight = 380;
 
       var usingSavedSettings = false;
 
@@ -282,30 +282,6 @@ server.on ('window', function (_socket, data) {
       }
    }
 
-   if (data.action == "button-save" && data.name == "indicator" && indicatorWindow) {
-      var pos = indicatorWindow.getPosition ();
-      var sz = indicatorWindow.getSize ();
-      var windowData = {
-         "position": {
-            "x": pos [0],
-            "y": pos [1]
-         },
-         "size": {
-            "width": sz [0],
-            "height": sz [1]
-         }
-      };
-
-      var savedWindowFile = "indicator_window.json";
-      jsonfile.writeFile (__approot + "/saved/" + savedWindowFile, windowData, function wroteJsonWindowFile (error) {
-         if (error) {
-            winston.error ("Error saving indicator window data to json file: " + savedWindowFile, error);
-         } else {
-            winston.info("Saved indicator window data to json file: " + savedWindowFile);
-         }
-      });
-   }
-
    if (data.action == "button-test" && data.name == "indicator" && indicatorWindow) {
       if (data.data == "rate") {
          server.toClient ('new rating', {'percent': 50});
@@ -393,6 +369,36 @@ server.on ('window', function (_socket, data) {
             indicatorWindow.show ();
             winston.verbose ("Indicator window shown");
             server.toClient ("window", {"name": "indicator", "event": "show"}, _socket);
+
+            var pos = indicatorWindow.getPosition ();
+            var sz = indicatorWindow.getSize ();
+            server.toClient ("window", {"name": "indicator", "event": "move", "data": pos}, _socket);
+            server.toClient ("window", {"name": "indicator", "event": "resize", "data": sz}, _socket);
+         });
+
+         indicatorWindow.on ('close', function () {
+            var pos = indicatorWindow.getPosition ();
+            var sz = indicatorWindow.getSize ();
+
+            var windowData = {
+               "position": {
+                  "x": pos [0],
+                  "y": pos [1]
+               },
+               "size": {
+                  "width": sz [0],
+                  "height": sz [1]
+               }
+            };
+
+            var savedWindowFile = "indicator_window.json";
+            jsonfile.writeFile (__approot + "/saved/" + savedWindowFile, windowData, function wroteJsonWindowFile (error) {
+               if (error) {
+                  winston.error ("Error saving indicator window data to json file: " + savedWindowFile, error);
+               } else {
+                  winston.info("Saved indicator window data to json file: " + savedWindowFile);
+               }
+            });
          });
 
          // Emitted when the window is closed.
@@ -402,9 +408,7 @@ server.on ('window', function (_socket, data) {
              // when you should delete the corresponding element.
 
              winston.verbose ("Indicator window closed");
-
              server.toClient("window", { "name": "indicator", "event": "close" }, _socket);
-
              indicatorWindow = null;
          });
 

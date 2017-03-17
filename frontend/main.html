@@ -53,33 +53,40 @@
           </div>
           <div class="pane center-container" id="pane-window">
               <div>
-                  <button class="btn btn-success" id="btn-show-indicator-window">Show Indicator Window</button>
+                  <h4>Primary Indicator Window</h4>
+                  <button class="btn btn-success" id="btn-show-indicator-window">Show Window</button>
                   <label class="checkbox-inline">
                     <input type="checkbox" checked data-toggle="toggle" data-on="Transparent" data-off="Normal Frame" id="chk-transparent" data-onstyle="info" data-offstyle="warning">
                   </label>
                   <br/>
-                  <button class="btn btn-large btn-default" id="btn-show-indicators">Toggle Borders</button>
-                  <br/>
-                  Position:&nbsp;<span id="indicator-window-position"></span>&nbsp;Size:&nbsp;<span id="indicator-window-size"></span>
-                  <br/>
-                  <button class="btn btn-small btn-default" id="btn-move-window-left">Left</button>
-                  <button class="btn btn-small btn-default" id="btn-move-window-up">Up</button>
-                  <button class="btn btn-small btn-default" id="btn-move-window-down">Down</button>
-                  <button class="btn btn-small btn-default" id="btn-move-window-right">Right</button>
-                  <br/>
-                  <button class="btn btn-small btn-default" id="btn-resize-window-grow-x">Width + 1</button>
-                  <button class="btn btn-small btn-default" id="btn-resize-window-shrink-x">Width - 1</button>
-                  <button class="btn btn-small btn-default" id="btn-resize-window-grow-y">Height + 1</button>
-                  <button class="btn btn-small btn-default" id="btn-resize-window-shrink-y">Height - 1</button>
-                  <br/>
-                  <button class="btn btn-large btn-default" id="btn-save-indicator-window">Save Window</button>
-                  <br/>
-                  <button class="btn btn-large btn-default" id="btn-test-rate">Test Rating</button>
-                  <br/>
-                  <button class="btn btn-large btn-default" id="btn-test-join">Test New Joiner</button>
-                  <br/>
-                  <button class="btn btn-large btn-default" id="btn-test-follow">Test New Follower</button>
-                  <br/>
+                  <h4>Move Window:&nbsp;<small id="indicator-window-position"></small></h4>
+                  <button class="on-window btn btn-small btn-default" id="btn-move-window-left"><span class="glyphicon glyphicon-arrow-left"></span></button>
+                  <button class="on-window btn btn-small btn-default" id="btn-move-window-up"><span class="glyphicon glyphicon-arrow-up"></span></button>
+                  <button class="on-window btn btn-small btn-default" id="btn-move-window-down"><span class="glyphicon glyphicon-arrow-down"></span></button>
+                  <button class="on-window btn btn-small btn-default" id="btn-move-window-right"><span class="glyphicon glyphicon-arrow-right"></span></button>
+                  <h4>Resize Window:&nbsp;<small id="indicator-window-size"></small></h4>
+                  <button class="on-window btn btn-small btn-default" id="btn-resize-window-grow-x"><span class="glyphicon glyphicon-resize-horizontal"></span>&nbsp;<span class="glyphicon glyphicon-plus-sign"></span></button>
+                  <button class="on-window btn btn-small btn-default" id="btn-resize-window-shrink-x"><span class="glyphicon glyphicon-resize-horizontal"></span>&nbsp;<span class="glyphicon glyphicon-minus-sign"></span></button>
+                  <button class="on-window btn btn-small btn-default" id="btn-resize-window-grow-y"><span class="glyphicon glyphicon-resize-vertical"></span>&nbsp;<span class="glyphicon glyphicon-plus-sign"></span></button>
+                  <button class="on-window btn btn-small btn-default" id="btn-resize-window-shrink-y"><span class="glyphicon glyphicon-resize-vertical"></span>&nbsp;<span class="glyphicon glyphicon-minus-sign"></span></button>
+                  <h4>Test Functions</h4>
+                  <div class="row">
+                      <div class="col-xs-6">
+                          <button class="on-window btn btn-large btn-default btn-sm btn-block" id="btn-show-indicators">Toggle Borders</button>                        
+                      </div>
+                      <div class="col-xs-6">
+                          <button class="on-window btn btn-large btn-default btn-sm btn-block" id="btn-test-rate">Rating</button>
+                      </div>
+                  </div>
+                  <p/>
+                  <div class="row">
+                      <div class="col-xs-6">
+                        <button class="on-window btn btn-large btn-default btn-sm btn-block" id="btn-test-join">New Joiner</button>
+                      </div>
+                      <div class="col-xs-6">
+                        <button class="on-window btn btn-large btn-default btn-sm btn-block" id="btn-test-follow">New Follower</button>
+                      </div>
+                  </div>
               </div>
           </div>
           <div class="pane hidden" id="pane-config">
@@ -164,15 +171,21 @@
 
          var indicatorWindowVisible = false;
 
+         $('.on-window').attr ('disabled','disabled');
+
          socket.on ('window', function (event) {
                if (event.name == 'indicator' && event.event == 'show') {
                   indicatorWindowVisible = true;
                   $('#btn-show-indicator-window').text ('Close Indicator Window');
+                  $('.on-window').removeAttr ('disabled','disabled');
+                  $('#chk-transparent').attr ('disabled','disabled');
                }
 
                if (event.name == 'indicator' && event.event == 'close') {
                   indicatorWindowVisible = false;
                   $('#btn-show-indicator-window').text ('Show Indicator Window');
+                  $('.on-window').attr ('disabled','disabled');
+                  $('#chk-transparent').removeAttr ('disabled','disabled');
                }
 
                if (event.name == 'indicator' && event.event == 'move') {
