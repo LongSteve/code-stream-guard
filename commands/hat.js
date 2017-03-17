@@ -18,8 +18,18 @@ module.exports = {
    particle_access_token: null,
    particle_device_id: null,
 
+   handleError: function (name, error) {
+      if (error.statusCode >= 400 && error.statusCode < 500) {
+         // 400's are normal if the hat isn't powered up and online
+         winston.warn ("Error " + error.statusCode + " calling hat "+name+" function, maybe it's offline?");
+      } else if (error) {
+         winston.error("Unexpected error " + error.statusCode + " calling hat "+name+" function: ", error);
+      }
+   },
+
    pulse: function () {
       var self = this;
+      winston.verbose ("Calling hat pulse function");
       self.particle.callFunction ({
          'deviceId': self.particle_device_id,
          'auth': self.particle_access_token,
@@ -29,13 +39,14 @@ module.exports = {
             winston.debug ("Success calling pulse function");
          },
          function (error) {
-            winston.error ("Failure calling pulse function: ", error);
+            self.handleError ("pulse", error);
          }
       );
    },
 
    rainbow: function () {
        var self = this;
+       winston.verbose ("Calling hat rainbow function");
        self.particle.callFunction ({
           'deviceId': self.particle_device_id,
           'auth': self.particle_access_token,
@@ -45,29 +56,31 @@ module.exports = {
              winston.debug ("Success calling rainbow function");
           },
           function (error) {
-             winston.error ("Failure calling rainbow function: ", error);
+             self.handleError ("rainbow", error);
           }
        );
    },
 
    color: function (c) {
        var self = this;
+       winston.verbose ("Calling hat colorwipe function, " + c);
        self.particle.callFunction ({
           'deviceId': self.particle_device_id,
           'auth': self.particle_access_token,
           'name': 'colorwipe',
           'argument': c}).then (
           function (data) {
-             winston.debug ("Success calling color function");
+             winston.debug ("Success calling colorwipe function");
           },
           function (error) {
-             winston.error ("Failure calling color function: ", error);
+             self.handleError ("colorwipe", error);
           }
        );
    },
 
    chatter: function () {
        var self = this;
+       winston.verbose ("Calling hat chatter function, 5");
        self.particle.callFunction ({
           'deviceId': self.particle_device_id,
           'auth': self.particle_access_token,
@@ -77,13 +90,14 @@ module.exports = {
              winston.debug ("Success calling chatter function");
           },
           function (error) {
-             winston.error ("Failure calling chatter function: ", error);
+             self.handleError ("chatter", error);
           }
        );
    },
 
    cylon: function (c) {
        var self = this;
+       winston.verbose ("Calling hat cylon function, c");
        self.particle.callFunction ({
           'deviceId': self.particle_device_id,
           'auth': self.particle_access_token,
@@ -93,7 +107,7 @@ module.exports = {
              winston.debug ("Success calling cylon function");
           },
           function (error) {
-             winston.error ("Failure calling cylon function: ", error);
+             self.handleError ("cylon", error);
           }
        );
    },
